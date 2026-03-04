@@ -18,9 +18,10 @@ public class Pedido {
     private BigDecimal total; // Import total calculat [cite: 1409]
     private String status = "PENDING"; // Estats: PENDING, PAID, SHIPPED... [cite: 1410, 1414]
 
+    // I asseguat-te que existeix el mètode Setter (o que tens la anotació @Data de Lombok)
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Usuario cliente; // El client que fa la compra [cite: 1412]
+    private Usuario usuario; // Verifica que es digui "usuario" i no "user" o "client"
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<LineaPedido> lineas; // Detalls dels productes comprats [cite: 1431]

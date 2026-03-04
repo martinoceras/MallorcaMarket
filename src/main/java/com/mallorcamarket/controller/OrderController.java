@@ -8,9 +8,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -25,32 +27,32 @@ public class OrderController {
 
     // Aquest mètode rep la petició del botó "Confirmar Pedido" de la vista del carret [cite: 421]
     @PostMapping("/checkout")
-    public String checkout(HttpSession session, Authentication auth) {
-        // 1. Obtenir el carret de la sessió [cite: 431]
+    public String checkout(HttpSession session, Principal principal) {
         List<LineaPedido> cart = (List<LineaPedido>) session.getAttribute("cart");
 
         if (cart == null || cart.isEmpty()) {
-            return "redirect:/cart?error=empty";
+            return "redirect:/cart";
         }
 
-        // 2. Obtenir l'usuari que està loguejat actualment [cite: 424]
-        String email = auth.getName();
-        Usuario cliente = usuarioService.buscarPorEmail(email);
+        // Recuperem l'usuari loguejat de la base de dades
+        String email = principal.getName();
+        Usuario usuario = usuarioService.buscarPorEmail(email);
 
         try {
-            // 3. Cridar al servei transaccional per processar la compra [cite: 425, 430]
-            // Recorda que aquí dins es valida l'estoc (RF-08) i es resta de MySQL [cite: 432, 436]
-            pedidoService.realizarPedido(cliente, cart);
+            // Cridem al servei que hem arreglat abans (el que restava l'estoc)
+            pedidoService.realizarPedido(cart, usuario);
 
-            // 4. Si tot ha anat bé, buidem el carret de la sessió [cite: 437]
+            // Netegem el carret de la sessió perquè la compra ja s'ha fet
             session.removeAttribute("cart");
 
-            // Redirigim a una pàgina d'èxit o a l'historial (RF-10) [cite: 221]
-            return "redirect:/?success_order";
-
-        } catch (RuntimeException e) {
-            // Si el PedidoService llança un error (ex: no hi ha estoc), tornem al carret amb el missatge
-            return "redirect:/cart?error=" + e.getMessage();
+            return "redirect:/orders/success";
+        } catch (Exception e) {
+            // Si hi ha un error (per exemple, si algú ha comprat l'última unitat just abans)
+            return "redirect:/cart?error=stock";
         }
+    }
+    @GetMapping("/success")
+    public String showSuccess() {
+        return "orders/success"; // Això busca el fitxer templates/orders/success.html
     }
 }
