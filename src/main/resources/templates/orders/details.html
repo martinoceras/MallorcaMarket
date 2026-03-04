@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalls de la Comanda - MallorcaMarket</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+  <div class="card shadow border-0">
+    <div class="card-header bg-primary text-white d-flex justify-content-between">
+      <h4 class="mb-0">Comanda #<span th:text="${pedido.id}">0</span></h4>
+      <span th:text="${#temporals.format(pedido.createdAt, 'dd/MM/yyyy HH:mm')}">Data</span>
+    </div>
+    <div class="card-body">
+      <h5>Productes comprats:</h5>
+      <table class="table mt-3">
+        <thead>
+        <tr>
+          <th>Producte</th>
+          <th class="text-center">Quantitat</th>
+          <th class="text-end">Preu Unitari</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="linea : ${pedido.lineas}">
+          <td th:text="${linea.producto.nombre}">Nom Producte</td>
+          <td class="text-center" th:text="${linea.cantidad}">1</td>
+          <td class="text-end" th:text="${linea.precioUnitario} + ' €'">0.00 €</td>
+          <td class="text-end fw-bold" th:text="${linea.precioUnitario * linea.cantidad} + ' €'">0.00 €</td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr class="table-light">
+          <td colspan="3" class="text-end fw-bold fs-5">TOTAL:</td>
+          <td class="text-end fw-bold fs-5 text-primary" th:text="${pedido.total} + ' €'">0.00 €</td>
+        </tr>
+        </tfoot>
+      </table>
+      <div class="mt-4">
+        <a href="/orders/my-orders" class="btn btn-outline-secondary">Tornar a l'historial</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

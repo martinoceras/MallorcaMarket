@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -70,5 +71,18 @@ public class OrderController {
         model.addAttribute("pedidos", pedidos);
 
         return "orders/list"; // Crearem aquest fitxer a templates/orders/list.html
+    }
+
+    @GetMapping("/details/{id}")
+    public String showOrderDetails(@PathVariable Long id, Model model, Principal principal) {
+        Pedido pedido = pedidoService.buscarPorId(id);
+
+        // Seguretat: Verifiquem que la comanda existeixi i sigui de l'usuari loguejat
+        if (pedido == null || !pedido.getUsuario().getEmail().equals(principal.getName())) {
+            return "redirect:/orders/my-orders";
+        }
+
+        model.addAttribute("pedido", pedido);
+        return "orders/details"; // Crearàs templates/orders/details.html
     }
 }

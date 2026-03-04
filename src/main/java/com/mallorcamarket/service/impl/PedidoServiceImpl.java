@@ -63,4 +63,9 @@ public class PedidoServiceImpl implements PedidoService {
         // Suposant que el teu PedidoRepository té aquest mètode (Spring Data JPA el crea sol)
         return pedidoRepository.findByUsuarioOrderByCreatedAtDesc(usuario);
     }
+
+    @Override
+    public Pedido buscarPorId(Long id) {
+        return pedidoRepository.findById(id).orElse(null);
+    }
 }

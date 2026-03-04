@@ -10,4 +10,5 @@ public interface PedidoService {
     void realizarPedido(List<LineaPedido> cart, Usuario usuario);
 
     List<Pedido> buscarPorUsuario(Usuario usuario);
+    Pedido buscarPorId(Long id);
 }
