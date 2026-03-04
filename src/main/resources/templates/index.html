@@ -21,14 +21,25 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title" th:text="${prod.nombre}">Nom del Producte</h5>
-                    <p class="card-text text-muted" th:text="${prod.descripcion}">Descripció...</p>
-                    <h4 class="text-primary" th:text="${prod.precio} + ' €'">0.00 €</h4>
-                </div>
+                    <p class="card-text" th:text="${prod.descripcion}">Descripció curta...</p>
 
-                <div class="card-footer bg-white border-0">
-                    <a th:href="@{/cart/add/{id}(id=${prod.id})}" class="btn btn-outline-primary w-100">
-                        Añadir al carrito
-                    </a>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Estoc: <span th:text="${prod.stock}"
+                                         th:classappend="${prod.stock < 5} ? 'text-danger fw-bold' : ''">0</span> unitats
+                        </small>
+                    </p>
+
+                    <h5 class="text-primary" th:text="${prod.precio} + ' €'">0.00 €</h5>
+
+                    <div th:if="${prod.stock > 0}">
+                        <a th:href="@{/cart/add/{id}(id=${prod.id})}" class="btn btn-primary w-100">
+                            Añadir al carrito
+                        </a>
+                    </div>
+                    <div th:unless="${prod.stock > 0}">
+                        <button class="btn btn-secondary w-100" disabled>Esgotat</button>
+                    </div>
                 </div>
             </div>
         </div>
