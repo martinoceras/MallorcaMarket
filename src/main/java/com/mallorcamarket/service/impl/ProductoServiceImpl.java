@@ -1,6 +1,7 @@
 package com.mallorcamarket.service.impl;
 
 import com.mallorcamarket.model.Producto;
+import com.mallorcamarket.model.Usuario;
 import com.mallorcamarket.repository.ProductoRepository;
 import com.mallorcamarket.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,11 @@ public class ProductoServiceImpl implements ProductoService {
             p.setActivo(false); // Canviem l'estat en lloc d'esborrar la fila
             productoRepository.save(p); // Guardem el canvi
         }
+    }
+
+    @Override
+    public List<Producto> buscarPorProveedor(Usuario proveedor) {
+        // Cridem al repositori passant-li l'objecte usuari sencer
+        return productoRepository.findByProveedor(proveedor);
     }
 }

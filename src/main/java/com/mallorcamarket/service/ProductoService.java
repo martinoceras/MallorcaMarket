@@ -1,6 +1,8 @@
 package com.mallorcamarket.service;
 
 import com.mallorcamarket.model.Producto;
+import com.mallorcamarket.model.Usuario;
+
 import java.util.List;
 
 // Una interfície és un contracte: defineix quines operacions pot fer el sistema [cite: 2023]
@@ -19,5 +21,8 @@ public interface ProductoService {
 
     // Mètode per desactivar un producte sense esborrar-lo (esborrat lògic)
     void eliminarLogico(Long id);
+
+    // Definim la "promesa" del mètode que llistarà només els productes d'un usuari
+    List<Producto> buscarPorProveedor(Usuario proveedor);
 
 }

@@ -12,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // 1. Definim el codificador de contrasenyes (Requisit RNF-02)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -22,17 +21,30 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Permetem accés total a la home, el registre i el login
-                        .requestMatchers("/", "/register", "/login", "/css/**", "/js/**").permitAll()
-                        // El carret només per a usuaris loguejats
-                        .requestMatchers("/cart/**").authenticated()
+                        // 1. Rutes Públiques: Qualsevol pot veure la botiga i els recursos estàtics
+                        .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+
+                        // 2. Rutes d'Administrador: Només usuaris amb ROLE_ADMIN
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // 3. Rutes de Proveïdor: Només usuaris amb ROLE_PROVIDER
+                        .requestMatchers("/proveedor/**").hasRole("PROVIDER")
+
+                        // 4. Rutes d'Usuari Loguejat: Carret i Comandes (Client, Admin o Provider)
+                        .requestMatchers("/cart/**", "/orders/**").authenticated()
+
+                        // 5. Qualsevol altra petició requereix estar autenticat
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Assegura't de tenir un controlador que retorni "login"
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true) // On va l'usuari quan fa login correctament
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/") // On va l'usuari quan tanca sessió
+                        .permitAll()
+                );
 
         return http.build();
     }

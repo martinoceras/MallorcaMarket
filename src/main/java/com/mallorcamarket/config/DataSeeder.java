@@ -55,7 +55,7 @@ public class DataSeeder {
                 p1.setPrecio(new BigDecimal("12.50")); // Usem BigDecimal per precisió monetària [cite: 1127, 1446]
                 p1.setStock(50);
                 p1.setActivo(true);
-                p1.setVendedor(venedor); // Assignem el venedor [cite: 1215]
+                p1.setProveedor(venedor); // Assignem el venedor [cite: 1215]
                 p1.setCategoria(alimentacio); // Assignem la categoria [cite: 1216]
                 prodRepo.save(p1);
 
@@ -65,7 +65,7 @@ public class DataSeeder {
                 p2.setPrecio(new BigDecimal("18.00"));
                 p2.setStock(20);
                 p2.setActivo(true);
-                p2.setVendedor(venedor);
+                p2.setProveedor(venedor);
                 p2.setCategoria(alimentacio);
                 prodRepo.save(p2);
 

@@ -2,55 +2,54 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>MallorcaMarket - Inici</title>
+    <title>MallorcaMarket - Productes Locals</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        .navbar-brand { fw-bold; letter-spacing: 1px; }
-        .card { transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); }
+        .product-card { transition: transform 0.2s; border: none; }
+        .product-card:hover { transform: translateY(-5px); }
+        .navbar-brand { font-weight: bold; letter-spacing: 1px; }
     </style>
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-5">
     <div class="container">
         <a class="navbar-brand" href="/">MallorcaMarket</a>
-
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
-
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link text-warning fw-bold" th:href="@{/admin/users}">
-                        <i class="bi bi-shield-lock"></i> Gestión Usuarios
-                    </a>
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Inici</a>
                 </li>
 
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" th:href="@{/orders/my-orders}">
-                        <i class="bi bi-list-check"></i> Mis Pedidos
+                <li class="nav-item" sec:authorize="hasRole('PROVIDER')">
+                    <a class="nav-link text-warning fw-bold" th:href="@{/proveedor/products}">
+                        <i class="bi bi-shop"></i> La meva Botiga
                     </a>
                 </li>
 
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-info fw-bold" th:href="@{/admin/products}">
-                        <i class="bi bi-box-seam"></i> Gestión Productos
+                        <i class="bi bi-shield-lock"></i> Admin
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/cart}">
-                        <i class="bi bi-cart"></i> Carrito
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-outline-light btn-sm position-relative" th:href="@{/cart}">
+                        <i class="bi bi-cart3"></i> Carrito
                     </a>
                 </li>
 
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <form th:action="@{/logout}" method="post" class="ms-lg-2">
-                        <button type="submit" class="btn btn-sm btn-outline-light">Sortir</button>
+                <li class="nav-item ms-lg-3" sec:authorize="!isAuthenticated()">
+                    <a class="btn btn-primary btn-sm" th:href="@{/login}">Iniciar Sessió</a>
+                </li>
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Sortir</button>
                     </form>
                 </li>
             </ul>
@@ -60,46 +59,46 @@
 
 <div class="container">
     <div class="row mb-4">
-        <div class="col">
-            <h2 class="border-bottom pb-2">Productes Locals de Mallorca</h2>
+        <div class="col-12">
+            <h2 class="fw-bold border-bottom pb-3">Productes Locals de Mallorca</h2>
+            <p class="text-muted" sec:authorize="isAuthenticated()">
+                Benvingut/da, <span class="fw-bold text-dark" th:text="${#authentication.name}">Usuari</span>
+            </p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 col-lg-4 mb-4" th:each="prod : ${productos}">
-            <div class="card h-100 shadow-sm border-0">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="col" th:each="p : ${productos}">
+            <div class="card h-100 shadow-sm product-card">
+                <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/400x250?text=MallorcaMarket'}"
+                     class="card-img-top" alt="Producte">
+
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold" th:text="${prod.nombre}">Nom del Producte</h5>
-                    <p class="card-text text-muted flex-grow-1" th:text="${prod.descripcion}">Descripció...</p>
+                    <h5 class="card-title fw-bold" th:text="${p.nombre}">Nom Producte</h5>
+                    <p class="card-text text-muted small mb-3" th:text="${p.descripcion}">Descripció breu.</p>
 
-                    <div class="mt-3">
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                Estoc: <span th:text="${prod.stock}"
-                                             th:classappend="${prod.stock < 5} ? 'text-danger fw-bold' : ''">0</span> unitats
-                            </small>
-                        </p>
-                        <h4 class="text-primary mb-3" th:text="${prod.precio} + ' €'">0.00 €</h4>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fs-4 fw-bold text-primary" th:text="${p.precio} + ' €'">0.00 €</span>
+                            <span class="badge bg-light text-dark border">
+                                Estoc: <span th:text="${p.stock}">0</span>
+                            </span>
+                        </div>
 
-                        <div th:if="${prod.stock > 0}">
-                            <a th:href="@{/cart/add/{id}(id=${prod.id})}" class="btn btn-primary w-100 shadow-sm">
-                                <i class="bi bi-cart-plus"></i> Añadir al carrito
+                        <div th:if="${p.proveedor != null and #authentication.name == p.proveedor.email}">
+                            <a th:href="@{/proveedor/products}" class="btn btn-warning w-100 fw-bold shadow-sm">
+                                <i class="bi bi-pencil-square me-2"></i>Gestionar Estoc
                             </a>
                         </div>
-                        <div th:unless="${prod.stock > 0}">
-                            <button class="btn btn-secondary w-100" disabled>
-                                <i class="bi bi-x-circle"></i> Esgotat
-                            </button>
+
+                        <div th:unless="${p.proveedor != null and #authentication.name == p.proveedor.email}">
+                            <a th:href="@{/cart/add/{id}(id=${p.id})}" class="btn btn-primary w-100 fw-bold shadow-sm">
+                                <i class="bi bi-cart-plus me-2"></i>Añadir al carrito
+                            </a>
                         </div>
+
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-12" th:if="${#lists.isEmpty(productos)}">
-            <div class="alert alert-info text-center py-5 shadow-sm">
-                <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
-                Encara no hi ha productes disponibles a la botiga.
             </div>
         </div>
     </div>
