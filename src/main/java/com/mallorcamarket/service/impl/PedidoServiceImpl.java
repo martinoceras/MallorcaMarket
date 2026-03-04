@@ -58,4 +58,9 @@ public class PedidoServiceImpl implements PedidoService {
             lineaPedidoRepository.save(item);
         }
     }
+    @Override
+    public List<Pedido> buscarPorUsuario(Usuario usuario) {
+        // Suposant que el teu PedidoRepository té aquest mètode (Spring Data JPA el crea sol)
+        return pedidoRepository.findByUsuarioOrderByCreatedAtDesc(usuario);
+    }
 }

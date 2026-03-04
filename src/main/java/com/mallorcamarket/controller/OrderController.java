@@ -1,6 +1,7 @@
 package com.mallorcamarket.controller;
 
 import com.mallorcamarket.model.LineaPedido;
+import com.mallorcamarket.model.Pedido;
 import com.mallorcamarket.model.Usuario;
 import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.UsuarioService;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,5 +56,19 @@ public class OrderController {
     @GetMapping("/success")
     public String showSuccess() {
         return "orders/success"; // Això busca el fitxer templates/orders/success.html
+    }
+    @GetMapping("/my-orders")
+    public String showMyOrders(Model model, Principal principal) {
+        // 1. Identifiquem qui és l'usuari loguejat
+        String email = principal.getName();
+        Usuario usuario = usuarioService.buscarPorEmail(email);
+
+        // 2. Recuperem les seves comandes
+        List<Pedido> pedidos = pedidoService.buscarPorUsuario(usuario);
+
+        // 3. Passem la llista a la vista
+        model.addAttribute("pedidos", pedidos);
+
+        return "orders/list"; // Crearem aquest fitxer a templates/orders/list.html
     }
 }
