@@ -6,6 +6,7 @@ import com.mallorcamarket.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service // Indica a Spring que aquesta classe conté la lògica de negoci [cite: 1486]
 public class ProductoServiceImpl implements ProductoService {
@@ -21,15 +22,22 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    public List<Producto> listarTodos() {
+        // Crida al repositori per portar tots els productes de MySQL
+        return productoRepository.findAll();
+    }
+
+    @Override
     public Producto buscarPorId(Long id) {
         // Busquem el producte o retornem null si no existeix
         return productoRepository.findById(id).orElse(null);
     }
 
     @Override
-    public Producto guardar(Producto producto) {
-        // Aquí podríem afegir lògica com: "Validar que el preu no sigui negatiu" [cite: 1907]
-        return productoRepository.save(producto);
+    @Transactional // Recorda importar org.springframework.transaction.annotation.Transactional
+    public void guardar(Producto producto) {
+        // Com que el mètode és 'void', no posem "return". Només guardem.
+        productoRepository.save(producto);
     }
 
     @Override
