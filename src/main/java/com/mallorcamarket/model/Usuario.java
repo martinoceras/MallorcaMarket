@@ -37,4 +37,9 @@ public class Usuario {
         this.nombre = nombre;
         this.rol = rol;
     }
+    // Mètode per saber si està actiu (Getter)
+    // Mètode per canviar l'estat (Setter)
+    // Dins de la classe Usuario
+    private boolean enabled; // Aquest booleà guarda si l'usuari pot entrar (true) o no (false)
+
 }

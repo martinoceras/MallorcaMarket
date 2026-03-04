@@ -10,10 +10,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Implementació de la lògica de negoci per a les comandes (RF-05)
+ */
 @Service
 public class PedidoServiceImpl implements PedidoService {
 
-    // AQUESTES LÍNIES SÓN LES QUE ET FALTAVEN PERQUÈ NO SURTI EN VERMELL:
+    // Injectem els repositoris necessaris per gestionar la persistència a MySQL
     @Autowired
     private PedidoRepository pedidoRepository;
 
@@ -23,49 +26,67 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private LineaPedidoRepository lineaPedidoRepository;
 
+    /**
+     * Gestiona tot el procés de compra de forma atòmica (RF-05, RF-06)
+     * L'anotació @Transactional garanteix que si falla la resta d'estoc,
+     * no es guardi la comanda a la base de dades (Integritat de dades).
+     */
     @Override
     @Transactional
     public void realizarPedido(List<LineaPedido> cart, Usuario usuario) {
-        // 1. Creem la capçalera de la comanda
+        // 1. CREACIÓ DE LA CAPÇALERA DE LA COMANDA
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setCreatedAt(LocalDateTime.now());
         pedido.setStatus("CONFIRMADO");
 
-        // Calculem el total (usant BigDecimal per precisió)
+        // Calculem el total de la compra recorrent el carret
         BigDecimal total = cart.stream()
                 .map(item -> item.getPrecioUnitario().multiply(new BigDecimal(item.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         pedido.setTotal(total);
 
-        // Guardem el pedido per obtenir el seu ID
+        // Guardem el pedido inicial per generar el seu ID a la base de dades
         final Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 2. Processem cada línia i actualitzem l'estoc (RF-03)
+        // 2. PROCESSAMENT DE PRODUCTES I ACTUALITZACIÓ D'ESTOC (RF-03, RF-08)
         for (LineaPedido item : cart) {
+            // Recuperem el producte actual de la base de dades
             Producto producto = item.getProducto();
 
-            // Restem la quantitat del carret al stock actual de la BD
+            // Calculem el nou estoc restant les unitats comprades
             int nouStock = producto.getStock() - item.getCantidad();
+
+            // Validació de seguretat: si no hi ha prou estoc, llancem error i la transacció es cancel·la
             if (nouStock < 0) {
                 throw new RuntimeException("No hi ha prou estoc per a: " + producto.getNombre());
             }
+
+            // Actualitzem el producte amb el nou estoc a la taula 'productos'
             producto.setStock(nouStock);
             productoRepository.save(producto);
 
-            // Assignem el pedido a la línia i la guardem
+            // Relacionem la línia de detall amb la comanda principal i la guardem
             item.setPedido(pedidoGuardado);
             lineaPedidoRepository.save(item);
         }
     }
+
+    /**
+     * Recupera l'historial de comandes d'un usuari concret ordenat per data (descendent)
+     */
     @Override
     public List<Pedido> buscarPorUsuario(Usuario usuario) {
-        // Suposant que el teu PedidoRepository té aquest mètode (Spring Data JPA el crea sol)
+        // Aquest mètode utilitza un "Query Method" de Spring Data JPA
         return pedidoRepository.findByUsuarioOrderByCreatedAtDesc(usuario);
     }
 
+    /**
+     * Busca una comanda específica pel seu identificador (per a la vista de detalls)
+     */
     @Override
     public Pedido buscarPorId(Long id) {
+        // Fem servir Optional.orElse(null) per evitar errors si l'ID no existeix
         return pedidoRepository.findById(id).orElse(null);
     }
 }
