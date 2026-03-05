@@ -55,7 +55,8 @@ public class ProductoController {
     // Esborrat lògic del producte [cite: 1902]
     @GetMapping("/productes/eliminar/{id}")
     public String eliminarProducte(@PathVariable("id") Long id) {
-        productoService.eliminarLogico(id);
+        // CANVIA eliminarLogico per eliminar
+        productoService.eliminar(id);
         return "redirect:/";
     }
 }

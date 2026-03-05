@@ -1,14 +1,14 @@
 package com.mallorcamarket.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Data; // <--- IMPRESCINDIBLE
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "productos")
-@Data
+@Data // <--- Aquesta línia genera els mètodes setVisible() i getVisible()
 @NoArgsConstructor
 public class Producto {
 
@@ -21,15 +21,17 @@ public class Producto {
     private BigDecimal precio;
     private Integer stock;
     private String imageUrl;
+
+    // Només una vegada cada variable!
     private Boolean activo = true;
+    private Boolean visible = true;
+
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    // Relació amb Categoria
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
-    // AQUEST ÉS EL NOM CORRECTE QUE HEM D'USAR SEMPRE
     @ManyToOne
     @JoinColumn(name = "proveedor_id")
     private Usuario proveedor;
