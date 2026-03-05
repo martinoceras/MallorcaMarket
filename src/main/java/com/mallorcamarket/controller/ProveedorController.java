@@ -1,7 +1,9 @@
 package com.mallorcamarket.controller;
 
+import com.mallorcamarket.model.Pedido;
 import com.mallorcamarket.model.Producto;
 import com.mallorcamarket.model.Usuario;
+import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.ProductoService;
 import com.mallorcamarket.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.util.List;
 
+
+
 @Controller
 @RequestMapping("/proveedor")
 public class ProveedorController {
@@ -24,6 +28,9 @@ public class ProveedorController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private PedidoService pedidoService;
 
     /**
      * Llista els productes del proveïdor autenticat.
@@ -139,5 +146,18 @@ public class ProveedorController {
             ra.addFlashAttribute("success", "Producte restaurat!");
         }
         return "redirect:/proveedor/products";
+    }
+    @GetMapping("/orders")
+    public String myOrders(Model model, @AuthenticationPrincipal UserDetails currentUser) {
+        // 1. Identifiquem el proveïdor
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
+
+        // 2. Busquem les comandes on hi ha productes seus
+        // Hauràs de crear aquest mètode al teu PedidoService
+        List<Pedido> comandes = pedidoService.buscarPorProveedor(proveedor);
+
+        model.addAttribute("comandes", comandes);
+        model.addAttribute("proveedor", proveedor); // Útil per filtrar dades a la vista
+        return "proveedor/orders";
     }
 }

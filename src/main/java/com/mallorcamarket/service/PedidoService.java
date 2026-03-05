@@ -11,4 +11,5 @@ public interface PedidoService {
 
     List<Pedido> buscarPorUsuario(Usuario usuario);
     Pedido buscarPorId(Long id);
+    List<Pedido> buscarPorProveedor(Usuario proveedor);
 }

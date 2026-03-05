@@ -37,8 +37,8 @@ public class PedidoServiceImpl implements PedidoService {
         // 1. CREACIÓ DE LA CAPÇALERA DE LA COMANDA
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
-        pedido.setCreatedAt(LocalDateTime.now());
-        pedido.setStatus("CONFIRMADO");
+        pedido.setFecha(LocalDateTime.now());
+        pedido.setEstado("CONFIRMAT");
 
         // Calculem el total de la compra recorrent el carret
         BigDecimal total = cart.stream()
@@ -77,8 +77,8 @@ public class PedidoServiceImpl implements PedidoService {
      */
     @Override
     public List<Pedido> buscarPorUsuario(Usuario usuario) {
-        // Aquest mètode utilitza un "Query Method" de Spring Data JPA
-        return pedidoRepository.findByUsuarioOrderByCreatedAtDesc(usuario);
+        // Assegura't que el nom coincideixi exactament amb el del Repositori
+        return pedidoRepository.findByUsuarioOrderByFechaDesc(usuario);
     }
 
     /**
@@ -88,5 +88,10 @@ public class PedidoServiceImpl implements PedidoService {
     public Pedido buscarPorId(Long id) {
         // Fem servir Optional.orElse(null) per evitar errors si l'ID no existeix
         return pedidoRepository.findById(id).orElse(null);
+    }
+    @Override
+    public List<Pedido> buscarPorProveedor(Usuario proveedor) {
+        // Cridem al repositori per fer la consulta a la base de dades
+        return pedidoRepository.findByProveedor(proveedor);
     }
 }

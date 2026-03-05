@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 @EnableWebSecurity
@@ -18,31 +19,37 @@ public class SecurityConfig {
     }
 
     @Bean
+    public SpringSecurityDialect springSecurityDialect() {
+        return new SpringSecurityDialect();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Rutes Públiques: Qualsevol pot veure la botiga i els recursos estàtics
+                        // Rutes públiques
                         .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
 
-                        // 2. Rutes d'Administrador: Només usuaris amb ROLE_ADMIN
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // 3. Rutes de Proveïdor: Només usuaris amb ROLE_PROVIDER
+                        // ACCÉS PROVEÏDOR: Sincronitzat amb ROLE_PROVIDER de la teva BD
                         .requestMatchers("/proveedor/**").hasRole("PROVIDER")
 
-                        // 4. Rutes d'Usuari Loguejat: Carret i Comandes (Client, Admin o Provider)
-                        .requestMatchers("/cart/**", "/orders/**").authenticated()
+                        // ACCÉS CLIENT: Sincronitzat amb ROLE_CLIENT de la teva BD
+                        .requestMatchers("/cart/**").hasRole("CLIENT")
 
-                        // 5. Qualsevol altra petició requereix estar autenticat
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true) // On va l'usuari quan fa login correctament
+                        .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/") // On va l'usuari quan tanca sessió
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
 

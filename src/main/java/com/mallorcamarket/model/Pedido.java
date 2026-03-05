@@ -2,27 +2,35 @@ package com.mallorcamarket.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "pedido")
+@Table(name = "pedidos") // Millor en plural per a la base de dades
 @Data
+@NoArgsConstructor
 public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime createdAt = LocalDateTime.now(); // Data de la compra [cite: 1408]
-    private BigDecimal total; // Import total calculat [cite: 1409]
-    private String status = "PENDING"; // Estats: PENDING, PAID, SHIPPED... [cite: 1410, 1414]
+    // Hem canviat 'createdAt' per 'fecha' per solucionar l'error de l'StackTrace
+    private LocalDateTime fecha = LocalDateTime.now();
 
-    // I asseguat-te que existeix el mètode Setter (o que tens la anotació @Data de Lombok)
+    private BigDecimal total;
+
+    // Usem "estado" per mantenir el català com a la resta del projecte
+    private String estado = "PENDENT";
+
+    // Relació amb el client que fa la compra
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Usuario usuario; // Verifica que es digui "usuario" i no "user" o "client"
+    private Usuario usuario;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
-    private List<LineaPedido> lineas; // Detalls dels productes comprats [cite: 1431]
+    // Relació amb els detalls de la comanda
+    // orphanRemoval = true serveix perquè si esborres una línia, s'esborri de la BD automàticament
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LineaPedido> lineas;
 }
