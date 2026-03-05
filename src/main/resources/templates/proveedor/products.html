@@ -25,11 +25,11 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold">Gestió del meu Inventari</h2>
-            <p class="text-muted">Aquí pots actualitzar el preu i la disponibilitat dels teus productes locals.</p>
+            <p class="text-muted">Actualitza preus i estoc, o gestiona els detalls dels teus productes.</p>
         </div>
-        <button class="btn btn-success shadow-sm">
+        <a th:href="@{/proveedor/products/new}" class="btn btn-success shadow-sm">
             <i class="bi bi-plus-lg me-2"></i>Nou Producte
-        </button>
+        </a>
     </div>
 
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
@@ -43,9 +43,9 @@
             <thead class="table-primary text-white">
             <tr>
                 <th class="ps-4">Producte</th>
-                <th>Preu Actual (€)</th>
-                <th>Unitats en Estoc</th>
-                <th class="text-center">Accions</th>
+                <th>Preu (€)</th>
+                <th>Estoc</th>
+                <th class="text-center">Accions de Gestió</th>
             </tr>
             </thead>
             <tbody>
@@ -56,7 +56,7 @@
 
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
-                            <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/50x50'}"
+                            <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/50x50?text=IMG'}"
                                  class="rounded me-3" width="50" height="50" alt="img">
                             <div>
                                 <span th:text="${p.nombre}" class="fw-bold d-block"></span>
@@ -64,28 +64,46 @@
                             </div>
                         </div>
                     </td>
+
                     <td>
-                        <div class="input-group input-group-sm" style="width: 130px;">
+                        <div class="input-group input-group-sm" style="width: 120px;">
                             <input type="number" step="0.01" name="precio" th:value="${p.precio}"
                                    class="form-control" required>
                             <span class="input-group-text">€</span>
                         </div>
                     </td>
+
                     <td>
                         <div class="d-flex align-items-center">
                             <input type="number" name="stock" th:value="${p.stock}"
-                                   class="form-control form-control-sm me-2" style="width: 80px;" required>
+                                   class="form-control form-control-sm me-2" style="width: 70px;" required>
                             <i th:if="${p.stock <= 5}" class="bi bi-exclamation-triangle-fill text-warning"
                                title="Estoc baix!"></i>
                         </div>
                     </td>
-                    <td class="text-center">
-                        <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
-                            <i class="bi bi-save me-1"></i> Actualitzar
-                        </button>
+
+                    <td class="text-center pe-4">
+                        <div class="btn-group shadow-sm">
+                            <button type="submit" class="btn btn-primary btn-sm" title="Guardar canvis ràpids">
+                                <i class="bi bi-save"></i>
+                            </button>
+
+                            <a th:href="@{/proveedor/products/edit/{id}(id=${p.id})}"
+                               class="btn btn-warning btn-sm" title="Editar informació completa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <a th:href="@{/proveedor/products/delete/{id}(id=${p.id})}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Estàs segur que vols donar de baixa aquest producte? No apareixerà a la botiga.')"
+                               title="Donar de baixa">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </form>
             </tr>
+
             <tr th:if="${#lists.isEmpty(productos)}">
                 <td colspan="4" class="text-center py-5 text-muted">
                     <i class="bi bi-info-circle fs-2 d-block mb-2"></i>
