@@ -18,37 +18,46 @@
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">MallorcaMarket</a>
 
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
                     <a class="nav-link active" href="/"><i class="bi bi-house-door"></i> Inici</a>
                 </li>
 
-                <li class="nav-item" sec:authorize="hasRole('PROVIDER')">
-                    <a class="nav-link text-warning fw-bold" href="/proveedor/products">
-                        <i class="bi bi-box-seam"></i> La meva Botiga
+                <li class="nav-item ms-lg-3" sec:authorize="hasRole('PROVIDER')">
+                    <a class="nav-link text-warning fw-bold" th:href="@{/proveedor/products}">
+                        <i class="bi bi-shop"></i> La meva Botiga
                     </a>
                 </li>
-                <li class="nav-item" sec:authorize="hasRole('PROVIDER')">
-                    <a class="nav-link text-info fw-bold" href="/proveedor/orders">
-                        <i class="bi bi-receipt"></i> Vendes Rebudes
+                <li class="nav-item ms-lg-2" sec:authorize="hasRole('PROVIDER')">
+                    <a class="nav-link text-info fw-bold" th:href="@{/orders/proveedor}">
+                        <i class="bi bi-receipt-cutoff"></i> Vendes Rebudes
                     </a>
                 </li>
 
-                <li class="nav-item ms-lg-3" sec:authorize="hasRole('CLIENT')">
-                    <a class="btn btn-outline-light position-relative" href="/cart">
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER')">
+                    <a class="nav-link fw-bold text-success" th:href="@{/orders/my-orders}">
+                        <i class="bi bi-bag-fill"></i> LES MEVES COMPRES
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER')">
+                    <a class="btn btn-outline-light position-relative" th:href="@{/cart}">
                         <i class="bi bi-cart3"></i> Carrito
                     </a>
                 </li>
 
-                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated()">
+                <li class="nav-item ms-lg-4" sec:authorize="isAuthenticated()">
                     <form th:action="@{/logout}" method="post" class="m-0">
-                        <button class="btn btn-danger btn-sm" type="submit">Sortir</button>
+                        <button class="btn btn-danger btn-sm fw-bold" type="submit">Sortir</button>
                     </form>
                 </li>
 
                 <li class="nav-item ms-lg-3" sec:authorize="!isAuthenticated()">
-                    <a class="btn btn-primary btn-sm" href="/login">Entrar</a>
+                    <a class="btn btn-primary btn-sm fw-bold" th:href="@{/login}">Entrar</a>
                 </li>
             </ul>
         </div>
