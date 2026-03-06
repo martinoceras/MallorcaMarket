@@ -85,4 +85,17 @@ public class OrderController {
         model.addAttribute("pedido", pedido);
         return "orders/details"; // Crearàs templates/orders/details.html
     }
+    // --- ZONA PROVEÏDOR: Comandes rebudes de clients ---
+    @GetMapping("/proveedor")
+    public String showSupplierOrders(Model model, Principal principal) {
+        // 1. Identifiquem qui és el proveïdor loguejat
+        Usuario proveedor = usuarioService.buscarPorEmail(principal.getName());
+
+        // 2. Recuperem les comandes que contenen productes d'aquest proveïdor
+        // Recorda que el PedidoService ha de tenir aquest mètode implementat
+        List<Pedido> comandesRebudes = pedidoService.buscarPorProveedor(proveedor);
+
+        model.addAttribute("comandes", comandesRebudes);
+        return "proveedor/orders"; // Crearàs templates/proveedor/orders.html
+    }
 }

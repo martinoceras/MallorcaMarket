@@ -2,50 +2,50 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Comandes Rebudes - MallorcaMarket</title>
+  <title>Vendes Rebudes - MallorcaMarket PRO</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
-  <div class="container">
-    <span class="navbar-brand fw-bold"><i class="bi bi-receipt me-2"></i>Panell de Vendes</span>
-    <a th:href="@{/proveedor/products}" class="btn btn-outline-light btn-sm">Gestionar Productes</a>
-  </div>
-</nav>
-
-<div class="container">
-  <h2 class="fw-bold mb-4">Comandes dels teus Clients</h2>
+<div class="container mt-5">
+  <h2 class="mb-4 text-primary font-monospace border-bottom pb-2">📦 Gestió de Vendes Rebudes</h2>
 
   <div th:if="${#lists.isEmpty(comandes)}" class="alert alert-info border-0 shadow-sm">
-    Encara no has rebut cap comanda. Ànims!
+    No s'ha trobat cap comanda amb els teus productes.
   </div>
 
-  <div th:each="pedido : ${comandes}" class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-      <div>
-        <span class="badge bg-primary me-2" th:text="'#' + ${pedido.id}">#1</span>
-        <strong th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">Data</strong>
-      </div>
-      <span class="badge rounded-pill bg-success" th:text="${pedido.estado}">PAGAT</span>
+  <div th:each="c : ${comandes}" class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-dark text-white d-flex justify-content-between">
+      <span>COMANDA <span th:text="'#' + ${c.id}">#1</span></span>
+      <span th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy HH:mm')}">Data</span>
     </div>
     <div class="card-body">
-      <h6><i class="bi bi-person me-2"></i>Client: <span th:text="${pedido.usuario.nombre}">Nom Client</span></h6>
-      <hr>
-      <table class="table table-sm table-borderless">
-        <thead>
-        <tr class="text-muted" style="font-size: 0.85rem;">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p class="mb-1 text-muted small uppercase">CLIENT</p>
+          <h6 th:text="${c.usuario.nombre}">Nom Client</h6>
+          <p class="text-primary small" th:text="${c.usuario.email}">email@client.com</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <span class="badge bg-info text-dark" th:text="${c.estado}">ESTAT</span>
+        </div>
+      </div>
+
+      <table class="table table-sm">
+        <thead class="table-light">
+        <tr>
           <th>Producte</th>
           <th class="text-center">Quantitat</th>
+          <th class="text-end">Preu Unit.</th>
           <th class="text-end">Subtotal</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="linea : ${pedido.lineas}" th:if="${linea.producto.proveedor.id == proveedor.id}">
-          <td th:text="${linea.producto.nombre}">Producte</td>
+        <tr th:each="linea : ${c.lineas}">
+          <td th:text="${linea.producto.nombre}">Oli de Mallorca</td>
           <td class="text-center" th:text="${linea.cantidad}">1</td>
-          <td class="text-end fw-bold" th:text="${linea.precio * linea.cantidad} + '€'">0€</td>
+          <td class="text-end" th:text="${linea.precioUnitario} + ' €'">10.00 €</td>
+          <td class="text-end fw-bold" th:text="${linea.precioUnitario * linea.cantidad} + ' €'">10.00 €</td>
         </tr>
         </tbody>
       </table>

@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // Spring buscarà per usuari i ho ordenarà per data de creació descendent
+    // Aquest és el mètode que el teu Service està buscant ara mateix
     List<Pedido> findByUsuarioOrderByFechaDesc(Usuario usuario);
 
-    // Aquesta és la que necessitem per al proveïdor (Panell de vendes)
-    @Query("SELECT DISTINCT p FROM Pedido p JOIN p.lineas l WHERE l.producto.proveedor = :proveedor")
+    // Mètode per a la zona de proveïdor: cerca comandes que tinguin els seus productes
+    @Query("SELECT DISTINCT p FROM Pedido p JOIN p.lineas l WHERE l.producto.proveedor = :proveedor ORDER BY p.fecha DESC")
     List<Pedido> findByProveedor(@Param("proveedor") Usuario proveedor);
 }
