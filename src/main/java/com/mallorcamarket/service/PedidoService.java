@@ -15,4 +15,7 @@ public interface PedidoService {
     // AFEGEIX AIXÒ ARA:
     void guardar(Pedido pedido);
     boolean pertanyAlProveedor(Pedido pedido, Usuario proveedor);
+
+    // Filter orders to show only line items for this provider
+    List<Pedido> buscarPorProveedorFiltered(Usuario proveedor);
 }

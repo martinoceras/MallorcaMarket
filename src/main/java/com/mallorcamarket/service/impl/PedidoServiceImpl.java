@@ -105,4 +105,20 @@ public class PedidoServiceImpl implements PedidoService {
         return pedido.getLineas().stream()
                 .anyMatch(linea -> linea.getProducto().getProveedor().getId().equals(proveedor.getId()));
     }
+
+    @Override
+    public List<Pedido> buscarPorProveedorFiltered(Usuario proveedor) {
+        // Get all orders that have products from this provider
+        List<Pedido> allOrders = buscarPorProveedor(proveedor);
+
+        // Filter the line items for each order to only show products from this provider
+        allOrders.forEach(pedido -> {
+            List<LineaPedido> filteredLines = pedido.getLineas().stream()
+                    .filter(linea -> linea.getProducto().getProveedor().getId().equals(proveedor.getId()))
+                    .toList();
+            pedido.setLineas(filteredLines);
+        });
+
+        return allOrders;
+    }
 }

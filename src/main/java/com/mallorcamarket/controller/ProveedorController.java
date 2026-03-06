@@ -98,7 +98,7 @@ public class ProveedorController {
     @GetMapping("/orders")
     public String myOrders(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
-        List<Pedido> comandes = pedidoService.buscarPorProveedor(proveedor);
+        List<Pedido> comandes = pedidoService.buscarPorProveedorFiltered(proveedor);
         model.addAttribute("comandes", comandes);
         return "proveedor/orders";
     }
