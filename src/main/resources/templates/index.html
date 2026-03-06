@@ -39,12 +39,23 @@
                     </a>
                 </li>
 
-                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER')">
+                <li class="nav-item ms-lg-3" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-danger fw-bold" th:href="@{/admin/products}">
+                        <i class="bi bi-box-seam"></i> Gestionar Productes
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-2" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-danger fw-bold" th:href="@{/admin/users}">
+                        <i class="bi bi-people"></i> Gestionar Usuaris
+                    </a>
+                </li>
+
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
                     <a class="nav-link fw-bold text-success" th:href="@{/orders/my-orders}">
                         <i class="bi bi-bag-fill"></i> LES MEVES COMPRES
                     </a>
                 </li>
-                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER')">
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
                     <a class="btn btn-outline-light position-relative" th:href="@{/cart}">
                         <i class="bi bi-cart3"></i> Carrito
                     </a>
