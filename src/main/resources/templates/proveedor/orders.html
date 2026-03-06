@@ -9,38 +9,21 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
   <div class="container">
     <a class="navbar-brand fw-bold" href="/">MallorcaMarket</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item">
           <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Inici</a>
         </li>
-
         <li class="nav-item ms-lg-3" sec:authorize="hasRole('PROVIDER')">
-          <a class="nav-link text-warning fw-bold" th:href="@{/proveedor/products}">
-            <i class="bi bi-shop"></i> La meva Botiga
-          </a>
+          <a class="nav-link text-warning fw-bold" th:href="@{/proveedor/products}">La meva Botiga</a>
         </li>
         <li class="nav-item ms-lg-2" sec:authorize="hasRole('PROVIDER')">
-          <a class="nav-link text-info fw-bold active" th:href="@{/orders/proveedor}">
-            <i class="bi bi-receipt-cutoff"></i> Vendes Rebudes
-          </a>
+          <a class="nav-link text-info fw-bold active" th:href="@{/proveedor/orders}">Vendes Rebudes</a>
         </li>
-
-        <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER')">
-          <a class="nav-link fw-bold text-success" th:href="@{/orders/my-orders}">
-            <i class="bi bi-bag-fill"></i> LES MEVES COMPRES
-          </a>
-        </li>
-
-        <li class="nav-item ms-lg-4" sec:authorize="isAuthenticated()">
+        <li class="nav-item ms-lg-4">
           <form th:action="@{/logout}" method="post" class="m-0">
             <button class="btn btn-danger btn-sm fw-bold" type="submit">Sortir</button>
           </form>
@@ -59,31 +42,41 @@
 
   <h2 class="mb-4 text-primary fw-bold"><i class="bi bi-box-seam me-2"></i> Gestió de Vendes Rebudes</h2>
 
-  <div th:if="${#lists.isEmpty(comandes)}" class="alert alert-info shadow-sm border-0">
-    Encara no has rebut cap comanda dels teus productes.
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-alert="dismiss"></button>
+  </div>
+
+  <div th:if="${#lists.isEmpty(comandes)}" class="alert alert-info">
+    Encara no has rebut cap comanda.
   </div>
 
   <div th:each="c : ${comandes}" class="card mb-4 shadow-sm border-0 rounded-3 overflow-hidden">
     <div class="card-header bg-white border-bottom py-3">
       <div class="row align-items-center">
         <div class="col-md-6">
-          <span class="text-muted small">COMANDA</span>
+          <span class="text-muted small">ID COMANDA</span>
           <h5 class="mb-0 fw-bold text-dark" th:text="'#' + ${c.id}">#1</h5>
         </div>
         <div class="col-md-6 text-md-end">
-          <span class="badge bg-primary px-3 py-2" th:text="${c.estado}">PENDENT</span>
+          <span class="badge px-3 py-2"
+                th:classappend="${c.estado == 'ENVIAT' ? 'bg-info text-white' : 'bg-warning text-dark'}"
+                th:text="${c.estado}">PENDENT</span>
         </div>
       </div>
     </div>
 
     <div class="card-body p-4">
-      <div class="mb-3">
-        <p class="mb-0 text-muted small">DADES DEL CLIENT</p>
-        <p class="mb-0 font-monospace text-dark">
-          <strong th:text="${c.usuario.nombre}">Nom</strong>
-          (<span th:text="${c.usuario.email}">email@test.com</span>)
-        </p>
-        <p class="text-muted small" th:text="'Data: ' + ${#temporals.format(c.fecha, 'dd/MM/yyyy HH:mm')}"></p>
+      <div class="row mb-3">
+        <div class="col-md-6 border-start border-4 border-primary ps-3">
+          <p class="mb-0 text-muted small fw-bold">DADES DEL CLIENT</p>
+          <p class="mb-0 fs-5"><strong th:text="${c.usuario.nombre}">Martí</strong></p>
+          <p class="text-muted" th:text="${c.usuario.email}">cliente@oli.cat</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0 text-muted small fw-bold">DATA DE COMPRA</p>
+          <p th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy HH:mm')}">Data</p>
+        </div>
       </div>
 
       <table class="table table-hover align-middle">
@@ -99,7 +92,8 @@
         <tr th:each="linea : ${c.lineas}">
           <td>
             <div class="d-flex align-items-center">
-              <img th:src="${linea.producto.imageUrl}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+              <img th:src="${linea.producto.imageUrl != null ? linea.producto.imageUrl : 'https://placehold.co/40x40'}"
+                   class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
               <span th:text="${linea.producto.nombre}">Producte</span>
             </div>
           </td>
@@ -107,8 +101,24 @@
           <td class="text-end" th:text="${linea.precioUnitario} + ' €'">0€</td>
           <td class="text-end fw-bold" th:text="${linea.precioUnitario * linea.cantidad} + ' €'">0€</td>
         </tr>
+        <tr class="table-light fw-bold">
+          <td colspan="3" class="text-end">Total Comanda:</td>
+          <td class="text-end text-primary fs-5" th:text="${c.total} + ' €'">0€</td>
+        </tr>
         </tbody>
       </table>
+
+      <div class="mt-4 text-end" th:if="${c.estado != 'ENVIAT'}">
+        <form th:action="@{/proveedor/orders/enviar/{id}(id=${c.id})}" method="post">
+          <button type="submit" class="btn btn-primary shadow-sm fw-bold">
+            <i class="bi bi-truck me-2"></i> MARCAR COM A ENVIAT
+          </button>
+        </form>
+      </div>
+
+      <div class="mt-4 text-end" th:if="${c.estado == 'ENVIAT'}">
+        <span class="text-success fw-bold"><i class="bi bi-check-all me-2"></i> Aquesta comanda ja s'ha enviat</span>
+      </div>
     </div>
   </div>
 </div>

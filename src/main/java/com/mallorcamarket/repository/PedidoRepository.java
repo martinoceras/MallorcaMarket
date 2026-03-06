@@ -15,4 +15,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     // Mètode per a la zona de proveïdor: cerca comandes que tinguin els seus productes
     @Query("SELECT DISTINCT p FROM Pedido p JOIN p.lineas l WHERE l.producto.proveedor = :proveedor ORDER BY p.fecha DESC")
     List<Pedido> findByProveedor(@Param("proveedor") Usuario proveedor);
+
+
 }

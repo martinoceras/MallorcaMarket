@@ -1,15 +1,18 @@
 package com.mallorcamarket.service;
 
+import com.mallorcamarket.model.LineaPedido;
 import com.mallorcamarket.model.Pedido;
 import com.mallorcamarket.model.Usuario;
-import com.mallorcamarket.model.LineaPedido;
 import java.util.List;
 
 public interface PedidoService {
-    // Mètode per processar la compra (Requisit RF-05)
+    // Mètodes que ja tenies...
     void realizarPedido(List<LineaPedido> cart, Usuario usuario);
-
     List<Pedido> buscarPorUsuario(Usuario usuario);
     Pedido buscarPorId(Long id);
     List<Pedido> buscarPorProveedor(Usuario proveedor);
+
+    // AFEGEIX AIXÒ ARA:
+    void guardar(Pedido pedido);
+    boolean pertanyAlProveedor(Pedido pedido, Usuario proveedor);
 }

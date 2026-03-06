@@ -94,4 +94,15 @@ public class PedidoServiceImpl implements PedidoService {
         // Cridem al repositori per fer la consulta a la base de dades
         return pedidoRepository.findByProveedor(proveedor);
     }
+    @Override
+    public void guardar(Pedido pedido) {
+        pedidoRepository.save(pedido);
+    }
+
+    @Override
+    public boolean pertanyAlProveedor(Pedido pedido, Usuario proveedor) {
+        // Verifiquem si alguna de les línies del pedido té un producte que ven aquest proveïdor
+        return pedido.getLineas().stream()
+                .anyMatch(linea -> linea.getProducto().getProveedor().getId().equals(proveedor.getId()));
+    }
 }

@@ -7,13 +7,9 @@ import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -22,80 +18,61 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
-    @Autowired
-    private PedidoService pedidoService;
+    @Autowired private PedidoService pedidoService;
+    @Autowired private UsuarioService usuarioService;
 
-    @Autowired
-    private UsuarioService usuarioService;
+    @GetMapping("/my-orders") // URL final: /orders/my-orders
+    public String showMyOrders(Model model, Principal principal) {
+        Usuario usuario = usuarioService.buscarPorEmail(principal.getName());
+        List<Pedido> pedidos = pedidoService.buscarPorUsuario(usuario);
+        model.addAttribute("pedidos", pedidos);
+        return "orders/list";
+    }
 
-    // Aquest mètode rep la petició del botó "Confirmar Pedido" de la vista del carret [cite: 421]
+    @GetMapping("/details/{id}") // URL final: /orders/details/{id}
+    public String showOrderDetails(@PathVariable Long id, Model model, Principal principal) {
+        Pedido pedido = pedidoService.buscarPorId(id);
+        if (pedido == null || !pedido.getUsuario().getEmail().equals(principal.getName())) {
+            return "redirect:/orders/my-orders";
+        }
+        model.addAttribute("pedido", pedido);
+        return "orders/details";
+    }
+
     @PostMapping("/checkout")
     public String checkout(HttpSession session, Principal principal) {
+        // Recuperem el carret de la sessió
+        @SuppressWarnings("unchecked")
         List<LineaPedido> cart = (List<LineaPedido>) session.getAttribute("cart");
 
+        // Validem que el carret no estigui buit
         if (cart == null || cart.isEmpty()) {
             return "redirect:/cart";
         }
 
-        // Recuperem l'usuari loguejat de la base de dades
-        String email = principal.getName();
-        Usuario usuario = usuarioService.buscarPorEmail(email);
+        // Recuperem l'usuari actual
+        Usuario usuario = usuarioService.buscarPorEmail(principal.getName());
+        if (usuario == null) {
+            return "redirect:/login";
+        }
 
         try {
-            // Cridem al servei que hem arreglat abans (el que restava l'estoc)
+            // Realitzem el pedido amb la lògica transaccional del servei
             pedidoService.realizarPedido(cart, usuario);
 
-            // Netegem el carret de la sessió perquè la compra ja s'ha fet
+            // Esborrem el carret de la sessió després de confirmar la comanda
             session.removeAttribute("cart");
 
+            // Redirigim a la pàgina d'èxit
             return "redirect:/orders/success";
-        } catch (Exception e) {
-            // Si hi ha un error (per exemple, si algú ha comprat l'última unitat just abans)
-            return "redirect:/cart?error=stock";
+        } catch (RuntimeException e) {
+            // Si hi ha error (p.ex. estoc insuficient), redirigim al carret amb l'error
+            return "redirect:/cart?error=" + e.getMessage();
         }
     }
+
     @GetMapping("/success")
-    public String showSuccess() {
-        return "orders/success"; // Això busca el fitxer templates/orders/success.html
-    }
-    @GetMapping("/my-orders")
-    public String showMyOrders(Model model, Principal principal) {
-        // 1. Identifiquem qui és l'usuari loguejat
-        String email = principal.getName();
-        Usuario usuario = usuarioService.buscarPorEmail(email);
-
-        // 2. Recuperem les seves comandes
-        List<Pedido> pedidos = pedidoService.buscarPorUsuario(usuario);
-
-        // 3. Passem la llista a la vista
-        model.addAttribute("pedidos", pedidos);
-
-        return "orders/list"; // Crearem aquest fitxer a templates/orders/list.html
-    }
-
-    @GetMapping("/details/{id}")
-    public String showOrderDetails(@PathVariable Long id, Model model, Principal principal) {
-        Pedido pedido = pedidoService.buscarPorId(id);
-
-        // Seguretat: Verifiquem que la comanda existeixi i sigui de l'usuari loguejat
-        if (pedido == null || !pedido.getUsuario().getEmail().equals(principal.getName())) {
-            return "redirect:/orders/my-orders";
-        }
-
-        model.addAttribute("pedido", pedido);
-        return "orders/details"; // Crearàs templates/orders/details.html
-    }
-    // --- ZONA PROVEÏDOR: Comandes rebudes de clients ---
-    @GetMapping("/proveedor")
-    public String showSupplierOrders(Model model, Principal principal) {
-        // 1. Identifiquem qui és el proveïdor loguejat
-        Usuario proveedor = usuarioService.buscarPorEmail(principal.getName());
-
-        // 2. Recuperem les comandes que contenen productes d'aquest proveïdor
-        // Recorda que el PedidoService ha de tenir aquest mètode implementat
-        List<Pedido> comandesRebudes = pedidoService.buscarPorProveedor(proveedor);
-
-        model.addAttribute("comandes", comandesRebudes);
-        return "proveedor/orders"; // Crearàs templates/proveedor/orders.html
+    public String showSuccessPage() {
+        return "orders/success";
     }
 }
