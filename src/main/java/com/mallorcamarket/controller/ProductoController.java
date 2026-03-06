@@ -1,12 +1,17 @@
 package com.mallorcamarket.controller;
 
 import com.mallorcamarket.model.Producto;
+import com.mallorcamarket.model.Usuario;
 import com.mallorcamarket.service.ProductoService;
 import com.mallorcamarket.service.CategoriaService;
+import com.mallorcamarket.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @Controller
 public class ProductoController {
@@ -17,10 +22,25 @@ public class ProductoController {
     @Autowired
     private CategoriaService categoriaService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     // Llistar productes (Pàgina principal) [cite: 949]
     @GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("productos", productoService.listarTodosActivos());
+    public String index(Model model, @AuthenticationPrincipal UserDetails currentUser) {
+        List<Producto> productos;
+
+        // If logged in as a provider, show only their products
+        if (currentUser != null && currentUser.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_PROVIDER"))) {
+            Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
+            productos = productoService.buscarPorProveedor(proveedor);
+        } else {
+            // If not logged in or not a provider, show all active and visible products
+            productos = productoService.listarTodosActivos();
+        }
+
+        model.addAttribute("productos", productos);
         return "index";
     }
 
