@@ -39,58 +39,92 @@ public class ProveedorController {
     public String updateProduct(@RequestParam("id") Long id,
                                 @RequestParam("precio") BigDecimal precio,
                                 @RequestParam("stock") Integer stock,
+                                @AuthenticationPrincipal UserDetails currentUser,
                                 RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto producto = productoService.buscarPorId(id);
-        if (producto != null) {
-            producto.setPrecio(precio);
-            producto.setStock(stock);
-            productoService.guardar(producto);
-            ra.addFlashAttribute("success", "Dades actualitzades.");
+
+        if (isNotOwnedByProveedor(producto, proveedor)) {
+            ra.addFlashAttribute("error", "No pots editar aquest producte.");
+            return "redirect:/proveedor/products";
         }
+
+        producto.setPrecio(precio);
+        producto.setStock(stock);
+        productoService.guardar(producto);
+        ra.addFlashAttribute("success", "Dades actualitzades.");
         return "redirect:/proveedor/products";
     }
 
     @PostMapping("/products/delete/{id}")
-    public String deleteProduct(@PathVariable Long id, RedirectAttributes ra) {
+    public String deleteProduct(@PathVariable Long id,
+                                @AuthenticationPrincipal UserDetails currentUser,
+                                RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto p = productoService.buscarPorId(id);
-        if (p != null) {
-            p.setActivo(false);
-            productoService.guardar(p);
-            ra.addFlashAttribute("success", "Producte enviat a la paperera.");
+
+        if (isNotOwnedByProveedor(p, proveedor)) {
+            ra.addFlashAttribute("error", "No pots eliminar aquest producte.");
+            return "redirect:/proveedor/products";
         }
+
+        p.setActivo(false);
+        productoService.guardar(p);
+        ra.addFlashAttribute("success", "Producte enviat a la paperera.");
         return "redirect:/proveedor/products";
     }
 
     @GetMapping("/products/restore/{id}")
-    public String restoreProduct(@PathVariable Long id, RedirectAttributes ra) {
+    public String restoreProduct(@PathVariable Long id,
+                                 @AuthenticationPrincipal UserDetails currentUser,
+                                 RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto p = productoService.buscarPorId(id);
-        if (p != null) {
-            p.setActivo(true);
-            productoService.guardar(p);
-            ra.addFlashAttribute("success", "Producte restaurat.");
+
+        if (isNotOwnedByProveedor(p, proveedor)) {
+            ra.addFlashAttribute("error", "No pots restaurar aquest producte.");
+            return "redirect:/proveedor/products";
         }
+
+        p.setActivo(true);
+        productoService.guardar(p);
+        ra.addFlashAttribute("success", "Producte restaurat.");
         return "redirect:/proveedor/products";
     }
 
     @PostMapping("/products/permanent-delete/{id}")
-    public String permanentDeleteProduct(@PathVariable Long id, RedirectAttributes ra) {
+    public String permanentDeleteProduct(@PathVariable Long id,
+                                         @AuthenticationPrincipal UserDetails currentUser,
+                                         RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto p = productoService.buscarPorId(id);
-        if (p != null) {
-            productoService.eliminar(id);
-            ra.addFlashAttribute("success", "Producte eliminat permanentment de la base de dades.");
+
+        if (isNotOwnedByProveedor(p, proveedor)) {
+            ra.addFlashAttribute("error", "No pots eliminar aquest producte.");
+            return "redirect:/proveedor/products";
         }
+
+        productoService.eliminar(id);
+        ra.addFlashAttribute("success", "Producte eliminat permanentment de la base de dades.");
         return "redirect:/proveedor/products";
     }
 
     @PostMapping("/products/toggle-visible/{id}")
-    public String toggleVisibility(@PathVariable Long id, RedirectAttributes ra) {
+    public String toggleVisibility(@PathVariable Long id,
+                                   @AuthenticationPrincipal UserDetails currentUser,
+                                   RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto p = productoService.buscarPorId(id);
-        if (p != null) {
-            p.setVisible(!p.getVisible());
-            productoService.guardar(p);
-            String status = p.getVisible() ? "públic" : "privat";
-            ra.addFlashAttribute("success", "Producte marcat com a " + status + ".");
+
+        if (isNotOwnedByProveedor(p, proveedor)) {
+            ra.addFlashAttribute("error", "No pots modificar aquest producte.");
+            return "redirect:/proveedor/products";
         }
+
+        p.setVisible(!Boolean.TRUE.equals(p.getVisible()));
+        productoService.guardar(p);
+        String status = Boolean.TRUE.equals(p.getVisible()) ? "públic" : "privat";
+        ra.addFlashAttribute("success", "Producte marcat com a " + status + ".");
         return "redirect:/proveedor/products";
     }
 
@@ -123,28 +157,61 @@ public class ProveedorController {
 
     // --- OBRIR FORMULARI D'EDICIÓ (Amb dades ja posades) ---
     @GetMapping("/products/edit/{id}")
-    public String showEditProductForm(@PathVariable Long id, Model model) {
+    public String showEditProductForm(@PathVariable Long id,
+                                      Model model,
+                                      @AuthenticationPrincipal UserDetails currentUser,
+                                      RedirectAttributes ra) {
+        Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto producto = productoService.buscarPorId(id);
+
+        if (isNotOwnedByProveedor(producto, proveedor)) {
+            ra.addFlashAttribute("error", "No pots editar aquest producte.");
+            return "redirect:/proveedor/products";
+        }
+
         model.addAttribute("producto", producto);
-        return "proveedor/product-form"; // Reutilitzem el mateix HTML
+        return "proveedor/product-form";
     }
 
     // --- DESAR LES DADES DEL FORMULARI ---
     @PostMapping("/products/save")
-    public String saveProduct(@ModelAttribute Producto producto,
+    public String saveProduct(@ModelAttribute Producto formProducto,
                               @AuthenticationPrincipal UserDetails currentUser,
                               RedirectAttributes ra) {
         Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
-        producto.setProveedor(proveedor);
 
-        // Si és nou, ens assegurem que estigui actiu
-        if (producto.getId() == null) {
-            producto.setActivo(true);
-            producto.setVisible(true);
+        Producto productoToSave;
+        if (formProducto.getId() == null) {
+            // New product
+            productoToSave = new Producto();
+            productoToSave.setActivo(true);
+            productoToSave.setVisible(true);
+        } else {
+            // Editing existing product
+            productoToSave = productoService.buscarPorId(formProducto.getId());
+            if (isNotOwnedByProveedor(productoToSave, proveedor)) {
+                ra.addFlashAttribute("error", "No pots modificar aquest producte.");
+                return "redirect:/proveedor/products";
+            }
         }
 
-        productoService.guardar(producto);
+        // Patch editable fields and keep provider/flags/category from DB for existing products.
+        productoToSave.setNombre(formProducto.getNombre());
+        productoToSave.setDescripcion(formProducto.getDescripcion());
+        productoToSave.setPrecio(formProducto.getPrecio());
+        productoToSave.setStock(formProducto.getStock());
+        productoToSave.setImageUrl(formProducto.getImageUrl());
+        productoToSave.setProveedor(proveedor);
+
+        productoService.guardar(productoToSave);
         ra.addFlashAttribute("success", "Producte desat correctament.");
         return "redirect:/proveedor/products";
+    }
+
+    private boolean isNotOwnedByProveedor(Producto producto, Usuario proveedor) {
+        return producto == null
+                || producto.getProveedor() == null
+                || proveedor == null
+                || !producto.getProveedor().getId().equals(proveedor.getId());
     }
 }

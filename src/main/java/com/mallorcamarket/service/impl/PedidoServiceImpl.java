@@ -101,24 +101,52 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public boolean pertanyAlProveedor(Pedido pedido, Usuario proveedor) {
-        // Verifiquem si alguna de les línies del pedido té un producte que ven aquest proveïdor
+        if (pedido == null || proveedor == null) {
+            return false;
+        }
+
+        // Defensive null checks avoid runtime failures when some products lost provider linkage.
         return pedido.getLineas().stream()
-                .anyMatch(linea -> linea.getProducto().getProveedor().getId().equals(proveedor.getId()));
+                .anyMatch(linea -> linea.getProducto() != null
+                        && linea.getProducto().getProveedor() != null
+                        && linea.getProducto().getProveedor().getId().equals(proveedor.getId()));
     }
 
     @Override
     public List<Pedido> buscarPorProveedorFiltered(Usuario proveedor) {
-        // Get all orders that have products from this provider
-        List<Pedido> allOrders = buscarPorProveedor(proveedor);
+        if (proveedor == null) {
+            return List.of();
+        }
 
-        // Filter the line items for each order to only show products from this provider
-        allOrders.forEach(pedido -> {
-            List<LineaPedido> filteredLines = pedido.getLineas().stream()
-                    .filter(linea -> linea.getProducto().getProveedor().getId().equals(proveedor.getId()))
-                    .toList();
-            pedido.setLineas(filteredLines);
-        });
+        return buscarPorProveedor(proveedor).stream()
+                .map(pedido -> buildProveedorView(pedido, proveedor))
+                .filter(pedido -> !pedido.getLineas().isEmpty())
+                .toList();
+    }
 
-        return allOrders;
+    private Pedido buildProveedorView(Pedido pedido, Usuario proveedor) {
+        List<LineaPedido> filteredLines = pedido.getLineas().stream()
+                .filter(linea -> lineaPerteneceAProveedor(linea, proveedor))
+                .toList();
+
+        BigDecimal providerTotal = filteredLines.stream()
+                .map(linea -> linea.getPrecioUnitario().multiply(BigDecimal.valueOf(linea.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Pedido view = new Pedido();
+        view.setId(pedido.getId());
+        view.setFecha(pedido.getFecha());
+        view.setEstado(pedido.getEstado());
+        view.setUsuario(pedido.getUsuario());
+        view.setLineas(filteredLines);
+        view.setTotal(providerTotal);
+        return view;
+    }
+
+    private boolean lineaPerteneceAProveedor(LineaPedido linea, Usuario proveedor) {
+        return linea != null
+                && linea.getProducto() != null
+                && linea.getProducto().getProveedor() != null
+                && linea.getProducto().getProveedor().getId().equals(proveedor.getId());
     }
 }
