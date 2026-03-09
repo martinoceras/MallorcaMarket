@@ -187,12 +187,12 @@ public class ProveedorController {
 
         Producto productoToSave;
         if (formProducto.getId() == null) {
-            // New product
+            // Producte nou
             productoToSave = new Producto();
             productoToSave.setActivo(true);
             productoToSave.setVisible(true);
         } else {
-            // Editing existing product
+            // Edicio d'un producte existent
             productoToSave = productoService.buscarPorId(formProducto.getId());
             if (isNotOwnedByProveedor(productoToSave, proveedor)) {
                 ra.addFlashAttribute("error", "No pots modificar aquest producte.");
@@ -200,7 +200,7 @@ public class ProveedorController {
             }
         }
 
-        // Patch editable fields and keep provider/flags from DB for existing products.
+        // Actualitza camps editables i conserva proveidor/flags dels productes existents.
         productoToSave.setNombre(formProducto.getNombre());
         productoToSave.setDescripcion(formProducto.getDescripcion());
         productoToSave.setPrecio(formProducto.getPrecio());

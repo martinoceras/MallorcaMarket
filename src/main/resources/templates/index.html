@@ -48,12 +48,12 @@
 
                 <li class="nav-item ms-lg-3" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-danger fw-bold" th:href="@{/admin/products}">
-                        <i class="bi bi-box-seam"></i> Gestionar Productes
+                        <i class="bi bi-box-seam"></i> Gestió de Productes
                     </a>
                 </li>
                 <li class="nav-item ms-lg-2" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-danger fw-bold" th:href="@{/admin/users}">
-                        <i class="bi bi-people"></i> Gestionar Usuaris
+                        <i class="bi bi-people"></i> Gestió d'Usuaris
                     </a>
                 </li>
                 <li class="nav-item ms-lg-2" sec:authorize="hasRole('ADMIN')">
@@ -69,7 +69,7 @@
                 </li>
                 <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
                     <a class="btn btn-outline-light position-relative" th:href="@{/cart}">
-                        <i class="bi bi-cart3"></i> Carrito
+                        <i class="bi bi-cart3"></i> Cistella
                     </a>
                 </li>
 
@@ -119,13 +119,13 @@
 
                         <div th:if="${p.proveedor != null and #authentication.name == p.proveedor.email}">
                             <a th:href="@{/proveedor/products}" class="btn btn-warning w-100 fw-bold shadow-sm">
-                                <i class="bi bi-pencil-square me-2"></i>Gestionar Estoc
+                                <i class="bi bi-pencil-square me-2"></i>Gestió d'Estoc
                             </a>
                         </div>
 
                         <div th:unless="${p.proveedor != null and #authentication.name == p.proveedor.email}">
                             <a th:href="@{/cart/add/{id}(id=${p.id})}" class="btn btn-primary w-100 fw-bold shadow-sm">
-                                <i class="bi bi-cart-plus me-2"></i>Añadir al carrito
+                                <i class="bi bi-cart-plus me-2"></i>Afegir a la cistella
                             </a>
                         </div>
                     </div>

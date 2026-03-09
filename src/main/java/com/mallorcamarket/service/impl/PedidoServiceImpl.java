@@ -40,7 +40,7 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setFecha(LocalDateTime.now());
         pedido.setEstado("CONFIRMAT");
 
-        // Calculem el total de la compra recorrent el carret
+        // Calculem el total de la compra recorrent la cistella
         BigDecimal total = cart.stream()
                 .map(item -> item.getPrecioUnitario().multiply(new BigDecimal(item.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

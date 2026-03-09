@@ -41,11 +41,11 @@ public class OrderController {
 
     @PostMapping("/checkout")
     public String checkout(HttpSession session, Principal principal) {
-        // Recuperem el carret de la sessió
+        // Recuperem la cistella de la sessió
         @SuppressWarnings("unchecked")
         List<LineaPedido> cart = (List<LineaPedido>) session.getAttribute("cart");
 
-        // Validem que el carret no estigui buit
+        // Validem que la cistella no estigui buit
         if (cart == null || cart.isEmpty()) {
             return "redirect:/cart";
         }
@@ -60,13 +60,13 @@ public class OrderController {
             // Realitzem el pedido amb la lògica transaccional del servei
             pedidoService.realizarPedido(cart, usuario);
 
-            // Esborrem el carret de la sessió després de confirmar la comanda
+            // Esborrem la cistellade la sessió després de confirmar la comanda
             session.removeAttribute("cart");
 
             // Redirigim a la pàgina d'èxit
             return "redirect:/orders/success";
         } catch (RuntimeException e) {
-            // Si hi ha error (p.ex. estoc insuficient), redirigim al carret amb l'error
+            // Si hi ha error (p.ex. estoc insuficient), redirigim a la cistella amb l'error
             return "redirect:/cart?error=" + e.getMessage();
         }
     }

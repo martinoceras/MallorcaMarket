@@ -69,7 +69,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // --- NOUS MÈTODES PER ALS BOTONS + I - DEL CARRET ---
+    // --- NOUS MÈTODES PER ALS BOTONS + I - DE LA CISTELLA ---
 
     @GetMapping("/add-one/{id}")
     public String addOne(@PathVariable Long id, HttpSession session) {
@@ -97,7 +97,7 @@ public class CartController {
                     if (item.getCantidad() > 1) {
                         item.setCantidad(item.getCantidad() - 1);
                     } else {
-                        // Si només queda 1, l'eliminem del carret
+                        // Si només queda 1, l'eliminem de la cistella
                         return "redirect:/cart/remove/" + id;
                     }
                     break;
