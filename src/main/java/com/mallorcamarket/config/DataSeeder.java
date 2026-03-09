@@ -25,10 +25,10 @@ public class DataSeeder {
                                    ProductoRepository prodRepo,
                                    CategoriaRepository catRepo) {
         return args -> {
-            // Verifiquem si la base de dades ja té dades per evitar l'error "Duplicate entry" [cite: 568]
+            // Verifiquem si la base de dades ja té dades per evitar l'error "Duplicate entry"
             if (userRepo.findByEmail("info@oli.cat") == null) {
 
-                // 1. CREAR CATEGORIES (Requisit RF-09) [cite: 220, 326]
+                // 1. CREAR CATEGORIES
                 Categoria alimentacio = new Categoria();
                 alimentacio.setNombre("Alimentació");
                 alimentacio.setDescripcion("Productes gastronòmics de l'illa");
@@ -39,24 +39,24 @@ public class DataSeeder {
                 artesania.setDescripcion("Productes fets a mà");
                 catRepo.save(artesania);
 
-                // 2. CREAR USUARI VENEDOR (Requisit RF-01) [cite: 212, 1207]
+                // 2. CREAR USUARI VENEDOR
                 Usuario venedor = new Usuario();
                 venedor.setNombre("Oli de Mallorca SL");
                 venedor.setEmail("info@oli.cat");
-                // Encriptem la contrasenya "1234" amb BCrypt (Requisit RNF-02)
+                // Encriptem la contrasenya "1234" amb BCrypt
                 venedor.setPassword(passwordEncoder.encode("1234"));
-                venedor.setRol("ROLE_PROVIDER"); // Rol de venedor [cite: 472, 714]
+                venedor.setRol("ROLE_PROVIDER"); // Rol de venedor
                 userRepo.save(venedor);
 
-                // 3. CREAR PRODUCTES DE PROVA (Requisit RF-03) [cite: 214, 1209]
+                // 3. CREAR PRODUCTES DE PROVA
                 Producto p1 = new Producto();
                 p1.setNombre("Oli d'Oliva Verge Extra");
                 p1.setDescripcion("Oli amb denominació d'origen de la Serra de Tramuntana");
-                p1.setPrecio(new BigDecimal("12.50")); // Usem BigDecimal per precisió monetària [cite: 1127, 1446]
+                p1.setPrecio(new BigDecimal("12.50")); // Usem BigDecimal per precisió monetària
                 p1.setStock(50);
                 p1.setActivo(true);
-                p1.setProveedor(venedor); // Assignem el venedor [cite: 1215]
-                p1.setCategoria(alimentacio); // Assignem la categoria [cite: 1216]
+                p1.setProveedor(venedor); // Assignem el venedor
+                p1.setCategoria(alimentacio); // Assignem la categoria
                 prodRepo.save(p1);
 
                 Producto p2 = new Producto();

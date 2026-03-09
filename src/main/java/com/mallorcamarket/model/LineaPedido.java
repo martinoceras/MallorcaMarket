@@ -12,14 +12,14 @@ public class LineaPedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer cantidad; // Quantitat comprada [cite: 1423]
+    private Integer cantidad; // Quantitat comprada
     private BigDecimal precioUnitario; // Preu en el moment de la compra
 
     @ManyToOne
     @JoinColumn(name = "pedido_id")
-    private Pedido pedido; // Comanda a la qual pertany [cite: 1427]
+    private Pedido pedido; // Comanda a la qual pertany
 
     @ManyToOne
     @JoinColumn(name = "producto_id")
-    private Producto producto; // Producte comprat [cite: 1428]
+    private Producto producto; // Producte comprat
 }

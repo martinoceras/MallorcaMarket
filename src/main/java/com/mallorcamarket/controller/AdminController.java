@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Controlador per a les funcions d'administració de la plataforma (Back-office).
- * Gestiona el manteniment d'usuaris (CU-05) i productes (CU-08).
+ * Gestiona el manteniment d'usuaris i productes.
  */
 @Controller
 @RequestMapping("/admin") // Totes les rutes d'aquest controlador requeriran el prefix /admin
@@ -37,7 +37,7 @@ public class AdminController {
     private CategoriaService categoriaService;
 
     // =========================================================================
-    // GESTIÓ D'USUARIS (CU-05)
+    // GESTIÓ D'USUARIS
     // =========================================================================
 
     /**
@@ -63,7 +63,7 @@ public class AdminController {
     }
 
     // =========================================================================
-    // GESTIÓ DE PRODUCTES (CU-08)
+    // GESTIÓ DE PRODUCTES
     // =========================================================================
 
     /**

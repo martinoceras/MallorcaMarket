@@ -7,15 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-@Service // Indica que és un component de lògica de negoci [cite: 1485]
+@Service // Indica que és un component de lògica de negoci
 public class CategoriaServiceImpl implements CategoriaService {
 
-    @Autowired // Connecta amb el repositori de dades [cite: 1495, 1504]
+    @Autowired // Connecta amb el repositori de dades
     private CategoriaRepository categoriaRepository;
 
     @Override
     public List<Categoria> listarTodas() {
-        return categoriaRepository.findAll(); // Recupera totes les categories de MySQL [cite: 1512]
+        return categoriaRepository.findAll(); // Recupera totes les categories de MySQL
     }
 
     @Override

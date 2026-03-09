@@ -17,7 +17,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Eina per encriptar contrasenyes (Requisit RNF-02: Seguretat)
+    // Eina per encriptar contrasenyes
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override

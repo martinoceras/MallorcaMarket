@@ -57,10 +57,10 @@ public class OrderController {
         }
 
         try {
-            // Realitzem el pedido amb la lògica transaccional del servei
+            // Realitzem la comanda amb la lògica transaccional del servei
             pedidoService.realizarPedido(cart, usuario);
 
-            // Esborrem la cistellade la sessió després de confirmar la comanda
+            // Esborrem la cistella de la sessió després de confirmar la comanda
             session.removeAttribute("cart");
 
             // Redirigim a la pàgina d'èxit

@@ -14,14 +14,14 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Mostra el formulari de registre [cite: 699, 1269]
+    // Mostra el formulari de registre
     @GetMapping("/register")
     public String mostrarFormulariRegistre(Model model) {
         model.addAttribute("usuario", new Usuario());
         return "auth/register"; // Ubicació a templates
     }
 
-    // Rep les dades del formulari i les envia al servei [cite: 702, 1262]
+    // Rep les dades del formulari i les envia al servei
     @PostMapping("/register")
     public String registrarUsuari(Usuario usuario) {
         usuarioService.registrar(usuario);

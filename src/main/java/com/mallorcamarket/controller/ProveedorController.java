@@ -156,7 +156,7 @@ public class ProveedorController {
     public String showNewProductForm(Model model) {
         model.addAttribute("producto", new Producto());
         model.addAttribute("categorias", categoriaService.listarTodas());
-        return "proveedor/product-form"; // Anem a crear aquest HTML ara
+        return "proveedor/product-form"; // crear HTML específic per a aquest formulari (templates/proveedor/product-form.html)
     }
 
     // --- OBRIR FORMULARI D'EDICIÓ (Amb dades ja posades) ---

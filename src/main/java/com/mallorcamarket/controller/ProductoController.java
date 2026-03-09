@@ -25,7 +25,7 @@ public class ProductoController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Llistar productes (Pàgina principal) [cite: 949]
+    // Llistar productes (Pàgina principal)
     @GetMapping("/")
     public String index(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         List<Producto> productos;
@@ -45,7 +45,7 @@ public class ProductoController {
     }
 
 
-    // Mostrar formulari per a nou producte [cite: 719]
+    // Mostrar formulari per a nou producte
     @GetMapping("/productes/nou")
     public String mostrarFormulariNou(Model model) {
         model.addAttribute("producto", new Producto());
@@ -56,14 +56,14 @@ public class ProductoController {
     // Aquest mètode rep les dades del formulari HTML
     @PostMapping("/productes/guardar")
     public String guardarProducte(@ModelAttribute("producto") Producto producto) {
-        // 1. Cridem al servei per persistir l'objecte a MySQL [cite: 563, 1443]
+        // 1. Cridem al servei per persistir l'objecte a MySQL
         productoService.guardar(producto);
 
-        // 2. Redirigim a la pàgina principal per veure el producte llistat [cite: 872]
+        // 2. Redirigim a la pàgina principal per veure el producte llistat
         return "redirect:/";
     }
 
-    // Editar un producte existent [cite: 1273]
+    // Editar un producte existent
     @GetMapping("/productes/editar/{id}")
     public String mostrarFormulariEditar(@PathVariable("id") Long id, Model model) {
         Producto producto = productoService.buscarPorId(id);
@@ -72,7 +72,7 @@ public class ProductoController {
         return "productes/formulari";
     }
 
-    // Esborrat lògic del producte [cite: 1902]
+    // Esborrat lògic del producte
     @GetMapping("/productes/eliminar/{id}")
     public String eliminarProducte(@PathVariable("id") Long id) {
         // CANVIA eliminarLogico per eliminar
