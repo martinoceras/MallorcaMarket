@@ -2,6 +2,7 @@ package com.mallorcamarket.controller;
 
 import com.mallorcamarket.model.Producto;
 import com.mallorcamarket.model.Usuario;
+import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.ProductoService;
 import com.mallorcamarket.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class AdminController {
 
     @Autowired
     private ProductoService productoService;
+
+    @Autowired
+    private PedidoService pedidoService;
 
     // =========================================================================
     // GESTIÓ D'USUARIS (CU-05)
@@ -81,5 +85,18 @@ public class AdminController {
         ra.addFlashAttribute("success", "El producte '" + producto.getNombre() + "' s'ha actualitzat correctament.");
 
         return "redirect:/admin/products";
+    }
+
+    // =========================================================================
+    // GESTIÓ DE COMANDES
+    // =========================================================================
+
+    /**
+     * Mostra totes les comandes de tots els proveïdors.
+     */
+    @GetMapping("/orders")
+    public String listAllOrders(Model model) {
+        model.addAttribute("pedidos", pedidoService.listarTodos());
+        return "admin/orders";
     }
 }

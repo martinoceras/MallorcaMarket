@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Totes les Comandes - MallorcaMarket Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    .order-card { transition: transform 0.2s; }
+    .order-card:hover { transform: translateY(-2px); }
+    .badge-estado { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">MallorcaMarket <span class="badge bg-primary ms-2">ADMIN</span></a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">
+            <i class="bi bi-house-door"></i> Inici
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/products}">
+            <i class="bi bi-box-seam"></i> Gestión Productos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/users}">
+            <i class="bi bi-people"></i> Gestión Usuarios
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/admin/orders}">
+            <i class="bi bi-receipt"></i> Totes les Comandes
+          </a>
+        </li>
+        <li class="nav-item ms-lg-3">
+          <form th:action="@{/logout}" method="post" class="m-0">
+            <button class="btn btn-danger btn-sm" type="submit">Sortir</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">
+        <i class="bi bi-receipt-cutoff me-2"></i>Totes les Comandes
+      </h2>
+      <p class="text-muted small mb-0">Vista global de totes les comandes de la plataforma</p>
+    </div>
+    <div class="badge bg-info text-dark fs-6 py-2 px-3">
+      Total: <span th:text="${#lists.size(pedidos)}">0</span> comandes
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(pedidos)}" class="alert alert-info text-center py-5">
+    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+    <h5>Encara no hi ha cap comanda a la plataforma</h5>
+  </div>
+
+  <div th:each="pedido : ${pedidos}" class="card shadow-sm border-0 rounded-3 mb-4 order-card">
+    <div class="card-header bg-white border-bottom py-3">
+      <div class="row align-items-center">
+        <div class="col-md-4">
+          <span class="text-muted small">COMANDA</span>
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-hash"></i><span th:text="${pedido.id}">1</span>
+          </h5>
+        </div>
+        <div class="col-md-4 text-center">
+          <span class="text-muted small d-block">CLIENT</span>
+          <strong th:text="${pedido.usuario.nombre}">Nom Client</strong>
+          <br>
+          <small class="text-muted" th:text="${pedido.usuario.email}">email@client.com</small>
+        </div>
+        <div class="col-md-4 text-end">
+          <span class="badge badge-estado"
+                th:classappend="${pedido.estado == 'ENVIAT' ? 'bg-success' :
+                                 pedido.estado == 'CONFIRMAT' ? 'bg-warning text-dark' : 'bg-secondary'}"
+                th:text="${pedido.estado}">ESTAT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p class="mb-1">
+            <i class="bi bi-calendar-event text-primary me-2"></i>
+            <strong>Data:</strong>
+            <span th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+          </p>
+        </div>
+        <div class="col-md-6 text-end">
+          <p class="mb-1">
+            <i class="bi bi-currency-euro text-success me-2"></i>
+            <strong>Import Total:</strong>
+            <span class="fs-5 text-success fw-bold" th:text="${pedido.total} + ' €'">0.00 €</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Producte</th>
+            <th>Proveïdor</th>
+            <th class="text-center">Quantitat</th>
+            <th class="text-end">Preu Unit.</th>
+            <th class="text-end">Subtotal</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="linea : ${pedido.lineas}">
+            <td>
+              <div class="d-flex align-items-center">
+                <img th:src="${linea.producto.imageUrl != null ? linea.producto.imageUrl : 'https://placehold.co/30x30'}"
+                     class="rounded me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                <span th:text="${linea.producto.nombre}">Producte</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-info text-dark"
+                    th:text="${linea.producto.proveedor != null ? linea.producto.proveedor.nombre : 'Sense proveïdor'}">
+                Proveïdor
+              </span>
+            </td>
+            <td class="text-center" th:text="${linea.cantidad}">1</td>
+            <td class="text-end" th:text="${#numbers.formatDecimal(linea.precioUnitario, 1, 2)} + ' €'">0.00 €</td>
+            <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(linea.precioUnitario * linea.cantidad, 1, 2)} + ' €'">0.00 €</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

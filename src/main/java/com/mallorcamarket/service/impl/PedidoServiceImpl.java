@@ -149,4 +149,11 @@ public class PedidoServiceImpl implements PedidoService {
                 && linea.getProducto().getProveedor() != null
                 && linea.getProducto().getProveedor().getId().equals(proveedor.getId());
     }
+
+    @Override
+    public List<Pedido> listarTodos() {
+        return pedidoRepository.findAll().stream()
+                .sorted((p1, p2) -> p2.getFecha().compareTo(p1.getFecha()))
+                .toList();
+    }
 }

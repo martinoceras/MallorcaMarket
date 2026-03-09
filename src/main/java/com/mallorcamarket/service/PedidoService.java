@@ -18,4 +18,7 @@ public interface PedidoService {
 
     // Filter orders to show only line items for this provider
     List<Pedido> buscarPorProveedorFiltered(Usuario proveedor);
+
+    // Get all orders for admin
+    List<Pedido> listarTodos();
 }

@@ -14,6 +14,11 @@
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">
+            <i class="bi bi-house-door"></i> Inici
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link active" th:href="@{/admin/products}">
             <i class="bi bi-box-seam"></i> Gestión Productos
           </a>
@@ -23,8 +28,15 @@
             <i class="bi bi-people"></i> Gestión Usuarios
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/orders}">
+            <i class="bi bi-receipt"></i> Totes les Comandes
+          </a>
+        </li>
         <li class="nav-item ms-lg-3">
-          <a class="btn btn-sm btn-outline-light mt-1" th:href="@{/}">Tornar a la Botiga</a>
+          <form th:action="@{/logout}" method="post" class="m-0">
+            <button class="btn btn-danger btn-sm" type="submit">Sortir</button>
+          </form>
         </li>
       </ul>
     </div>

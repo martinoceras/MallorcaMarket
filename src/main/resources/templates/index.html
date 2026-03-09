@@ -49,6 +49,11 @@
                         <i class="bi bi-people"></i> Gestionar Usuaris
                     </a>
                 </li>
+                <li class="nav-item ms-lg-2" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-danger fw-bold" th:href="@{/admin/orders}">
+                        <i class="bi bi-receipt"></i> Totes les Comandes
+                    </a>
+                </li>
 
                 <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
                     <a class="nav-link fw-bold text-success" th:href="@{/orders/my-orders}">
