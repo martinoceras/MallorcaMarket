@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
 <head>
   <meta charset="UTF-8">
   <title>Totes les Comandes - MallorcaMarket Admin</title>
@@ -9,6 +9,15 @@
     .order-card { transition: transform 0.2s; }
     .order-card:hover { transform: translateY(-2px); }
     .badge-estado { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+    .order-head-col { min-height: 56px; }
+    .client-wrap { max-width: 100%; }
+    .client-email {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .order-lines-table { table-layout: fixed; }
   </style>
 </head>
 <body class="bg-light">
@@ -68,38 +77,37 @@
 
   <div th:each="pedido : ${pedidos}" class="card shadow-sm border-0 rounded-3 mb-4 order-card">
     <div class="card-header bg-white border-bottom py-3">
-      <div class="row align-items-center">
-        <div class="col-md-4">
+      <div class="row align-items-center g-2">
+        <div class="col-12 col-md-4 order-head-col d-flex flex-column justify-content-center text-start">
           <span class="text-muted small">COMANDA</span>
           <h5 class="mb-0 fw-bold text-dark">
             <i class="bi bi-hash"></i><span th:text="${pedido.id}">1</span>
           </h5>
         </div>
-        <div class="col-md-4 text-center">
+        <div class="col-12 col-md-4 order-head-col d-flex flex-column justify-content-center text-start text-md-center">
           <span class="text-muted small d-block">CLIENT</span>
-          <strong th:text="${pedido.usuario.nombre}">Nom Client</strong>
-          <br>
-          <small class="text-muted" th:text="${pedido.usuario.email}">email@client.com</small>
+          <div class="client-wrap">
+            <strong class="d-block text-truncate" th:text="${pedido.usuario.nombre}">Nom Client</strong>
+            <small class="text-muted client-email" th:text="${pedido.usuario.email}">email@client.com</small>
+          </div>
         </div>
-        <div class="col-md-4 text-end">
-          <span class="badge badge-estado"
-                th:classappend="${pedido.estado == 'ENVIAT' ? 'bg-success' :
-                                 pedido.estado == 'CONFIRMAT' ? 'bg-warning text-dark' : 'bg-secondary'}"
+        <div class="col-12 col-md-4 order-head-col d-flex align-items-center justify-content-start justify-content-md-end">
+          <span th:class="${pedido.estado == 'ENVIAT'} ? 'badge badge-estado bg-success' : (${pedido.estado == 'CONFIRMAT'} ? 'badge badge-estado bg-warning text-dark' : 'badge badge-estado bg-secondary')"
                 th:text="${pedido.estado}">ESTAT</span>
         </div>
       </div>
     </div>
 
     <div class="card-body p-4">
-      <div class="row mb-3">
-        <div class="col-md-6">
+      <div class="row mb-3 align-items-center">
+        <div class="col-12 col-md-6 text-start">
           <p class="mb-1">
             <i class="bi bi-calendar-event text-primary me-2"></i>
             <strong>Data:</strong>
             <span th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
           </p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-12 col-md-6 text-start text-md-end">
           <p class="mb-1">
             <i class="bi bi-currency-euro text-success me-2"></i>
             <strong>Import Total:</strong>
@@ -109,7 +117,14 @@
       </div>
 
       <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle mb-0">
+        <table class="table table-sm table-hover align-middle mb-0 order-lines-table">
+          <colgroup>
+            <col style="width: 38%;">
+            <col style="width: 22%;">
+            <col style="width: 12%;">
+            <col style="width: 14%;">
+            <col style="width: 14%;">
+          </colgroup>
           <thead class="table-light">
           <tr>
             <th>Producte</th>
@@ -124,6 +139,7 @@
             <td>
               <div class="d-flex align-items-center">
                 <img th:src="${linea.producto.imageUrl != null ? linea.producto.imageUrl : 'https://placehold.co/30x30'}"
+                     alt="Producte"
                      class="rounded me-2" style="width: 30px; height: 30px; object-fit: cover;">
                 <span th:text="${linea.producto.nombre}">Producte</span>
               </div>
