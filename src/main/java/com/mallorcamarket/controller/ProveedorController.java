@@ -1,8 +1,10 @@
 package com.mallorcamarket.controller;
 
+import com.mallorcamarket.model.Categoria;
 import com.mallorcamarket.model.Pedido;
 import com.mallorcamarket.model.Producto;
 import com.mallorcamarket.model.Usuario;
+import com.mallorcamarket.service.CategoriaService;
 import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.ProductoService;
 import com.mallorcamarket.service.UsuarioService;
@@ -25,6 +27,7 @@ public class ProveedorController {
     @Autowired private ProductoService productoService;
     @Autowired private UsuarioService usuarioService;
     @Autowired private PedidoService pedidoService;
+    @Autowired private CategoriaService categoriaService;
 
     // --- 1. PRODUCTES (FUNCIONALITAT ORIGINAL RECUPERADA) ---
     @GetMapping("/products")
@@ -152,6 +155,7 @@ public class ProveedorController {
     @GetMapping("/products/new")
     public String showNewProductForm(Model model) {
         model.addAttribute("producto", new Producto());
+        model.addAttribute("categorias", categoriaService.listarTodas());
         return "proveedor/product-form"; // Anem a crear aquest HTML ara
     }
 
@@ -170,6 +174,7 @@ public class ProveedorController {
         }
 
         model.addAttribute("producto", producto);
+        model.addAttribute("categorias", categoriaService.listarTodas());
         return "proveedor/product-form";
     }
 
@@ -195,13 +200,26 @@ public class ProveedorController {
             }
         }
 
-        // Patch editable fields and keep provider/flags/category from DB for existing products.
+        // Patch editable fields and keep provider/flags from DB for existing products.
         productoToSave.setNombre(formProducto.getNombre());
         productoToSave.setDescripcion(formProducto.getDescripcion());
         productoToSave.setPrecio(formProducto.getPrecio());
         productoToSave.setStock(formProducto.getStock());
         productoToSave.setImageUrl(formProducto.getImageUrl());
         productoToSave.setProveedor(proveedor);
+
+        Long categoriaId = formProducto.getCategoria() != null ? formProducto.getCategoria().getId() : null;
+        if (categoriaId == null) {
+            ra.addFlashAttribute("error", "Has de seleccionar una categoria.");
+            return "redirect:/proveedor/products";
+        }
+
+        Categoria categoria = categoriaService.buscarPorId(categoriaId);
+        if (categoria == null) {
+            ra.addFlashAttribute("error", "La categoria seleccionada no existeix.");
+            return "redirect:/proveedor/products";
+        }
+        productoToSave.setCategoria(categoria);
 
         productoService.guardar(productoToSave);
         ra.addFlashAttribute("success", "Producte desat correctament.");
@@ -215,3 +233,4 @@ public class ProveedorController {
                 || !producto.getProveedor().getId().equals(proveedor.getId());
     }
 }
+

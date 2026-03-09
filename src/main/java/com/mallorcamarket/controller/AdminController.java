@@ -1,7 +1,9 @@
 package com.mallorcamarket.controller;
 
+import com.mallorcamarket.model.Categoria;
 import com.mallorcamarket.model.Producto;
 import com.mallorcamarket.model.Usuario;
+import com.mallorcamarket.service.CategoriaService;
 import com.mallorcamarket.service.PedidoService;
 import com.mallorcamarket.service.ProductoService;
 import com.mallorcamarket.service.UsuarioService;
@@ -30,6 +32,9 @@ public class AdminController {
 
     @Autowired
     private PedidoService pedidoService;
+
+    @Autowired
+    private CategoriaService categoriaService;
 
     // =========================================================================
     // GESTIÓ D'USUARIS (CU-05)
@@ -68,22 +73,88 @@ public class AdminController {
     public String listProducts(Model model) {
         // Carreguem els productes per pintar la taula d'edició
         model.addAttribute("productos", productoService.listarTodos());
+        model.addAttribute("categorias", categoriaService.listarTodas());
         return "admin/products"; // Retorna templates/admin/products.html
     }
 
     /**
-     * Actualitza les dades d'un producte (preu i estoc).
-     * @param producto Objecte mapejat automàticament des del formulari HTML.
-     * @param ra Atributs de redirecció per enviar missatges de confirmació (Flash Attributes).
+     * Actualitza les dades editables d'un producte sense perdre camps existents.
      */
     @PostMapping("/products/update")
-    public String updateProduct(@ModelAttribute Producto producto, RedirectAttributes ra) {
-        // Persistim els canvis a MySQL mitjançant el servei
+    public String updateProduct(@RequestParam("id") Long id,
+                                @RequestParam("precio") java.math.BigDecimal precio,
+                                @RequestParam("stock") Integer stock,
+                                @RequestParam("categoriaId") Long categoriaId,
+                                RedirectAttributes ra) {
+        Producto producto = productoService.buscarPorId(id);
+        if (producto == null) {
+            ra.addFlashAttribute("error", "No s'ha trobat el producte.");
+            return "redirect:/admin/products";
+        }
+
+        Categoria categoria = categoriaService.buscarPorId(categoriaId);
+        if (categoria == null) {
+            ra.addFlashAttribute("error", "La categoria seleccionada no existeix.");
+            return "redirect:/admin/products";
+        }
+
+        producto.setPrecio(precio);
+        producto.setStock(stock);
+        producto.setCategoria(categoria);
         productoService.guardar(producto);
 
-        // Enviem un missatge d'èxit que només durarà una petició (evita persistència visual)
         ra.addFlashAttribute("success", "El producte '" + producto.getNombre() + "' s'ha actualitzat correctament.");
 
+        return "redirect:/admin/products";
+    }
+
+    /**
+     * Crea una nova categoria per als productes.
+     */
+    @PostMapping("/categories/create")
+    public String createCategory(@RequestParam("nombre") String nombre,
+                                 @RequestParam(value = "descripcion", required = false) String descripcion,
+                                 RedirectAttributes ra) {
+        String cleanName = nombre != null ? nombre.trim() : "";
+        if (cleanName.isEmpty()) {
+            ra.addFlashAttribute("error", "El nom de la categoria es obligatori.");
+            return "redirect:/admin/products";
+        }
+
+        Categoria categoria = new Categoria();
+        categoria.setNombre(cleanName);
+        categoria.setDescripcion(descripcion != null ? descripcion.trim() : null);
+        categoriaService.guardar(categoria);
+
+        ra.addFlashAttribute("success", "Categoria creada correctament: " + cleanName + ".");
+        return "redirect:/admin/products";
+    }
+
+    /**
+     * Actualitza una categoria existent.
+     */
+    @PostMapping("/categories/update")
+    public String updateCategory(@RequestParam("id") Long id,
+                                 @RequestParam("nombre") String nombre,
+                                 @RequestParam(value = "descripcion", required = false) String descripcion,
+                                 RedirectAttributes ra) {
+        Categoria categoria = categoriaService.buscarPorId(id);
+        if (categoria == null) {
+            ra.addFlashAttribute("error", "No s'ha trobat la categoria.");
+            return "redirect:/admin/products";
+        }
+
+        String cleanName = nombre != null ? nombre.trim() : "";
+        if (cleanName.isEmpty()) {
+            ra.addFlashAttribute("error", "El nom de la categoria es obligatori.");
+            return "redirect:/admin/products";
+        }
+
+        categoria.setNombre(cleanName);
+        categoria.setDescripcion(descripcion != null ? descripcion.trim() : null);
+        categoriaService.guardar(categoria);
+
+        ra.addFlashAttribute("success", "Categoria actualitzada correctament: " + cleanName + ".");
         return "redirect:/admin/products";
     }
 

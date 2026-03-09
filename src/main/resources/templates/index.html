@@ -98,6 +98,8 @@
 
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title fw-bold" th:text="${p.nombre}">Nom Producte</h5>
+                    <span class="badge bg-secondary-subtle text-dark border mb-2"
+                          th:text="${p.categoria != null ? p.categoria.nombre : 'Sense categoria'}">Categoria</span>
                     <p class="card-text text-muted small mb-3" th:text="${p.descripcion}">Descripció breu.</p>
 
                     <div class="mt-auto">

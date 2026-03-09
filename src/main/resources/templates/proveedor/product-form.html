@@ -27,6 +27,14 @@
               <textarea th:field="*{descripcion}" class="form-control" rows="3"></textarea>
             </div>
 
+            <div class="mb-3">
+              <label class="form-label fw-bold">Categoria</label>
+              <select th:field="*{categoria.id}" class="form-select" required>
+                <option value="">Selecciona una categoria</option>
+                <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nombre}"></option>
+              </select>
+            </div>
+
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Preu (€)</label>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
 <head>
   <meta charset="UTF-8">
   <title>Gestió d'Inventari - MallorcaMarket</title>
@@ -20,12 +20,12 @@
         </li>
         <li class="nav-item">
           <a class="nav-link active" th:href="@{/admin/products}">
-            <i class="bi bi-box-seam"></i> Gestión Productos
+            <i class="bi bi-box-seam"></i> Gestió Productes
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" th:href="@{/admin/users}">
-            <i class="bi bi-people"></i> Gestión Usuarios
+            <i class="bi bi-people"></i> Gestió Usuaris
           </a>
         </li>
         <li class="nav-item">
@@ -44,12 +44,18 @@
 </nav>
 
 <div class="container">
-  <h2 class="fw-bold text-dark mb-3">Gestión de Productos</h2>
-  <p class="text-muted mb-4">Modifica el preu i l'estoc dels productes en temps real.</p>
+  <h2 class="fw-bold text-dark mb-3">Gestió de Productes</h2>
+  <p class="text-muted mb-4">Modifica preu, estoc i categoria dels productes.</p>
 
   <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
     <i class="bi bi-check-circle-fill me-2"></i>
     <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <span th:text="${error}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 
@@ -58,6 +64,8 @@
       <thead class="table-dark">
       <tr>
         <th class="ps-4">Producte</th>
+        <th>Proveïdor</th>
+        <th>Categoria</th>
         <th>Preu (€)</th>
         <th>Estoc</th>
         <th class="text-center">Accions</th>
@@ -65,31 +73,106 @@
       </thead>
       <tbody>
       <tr th:each="p : ${productos}">
-        <form th:action="@{/admin/products/update}" method="post">
-          <input type="hidden" name="id" th:value="${p.id}">
-          <input type="hidden" name="nombre" th:value="${p.nombre}">
-          <input type="hidden" name="descripcion" th:value="${p.descripcion}">
+          <form th:id="'product-form-' + ${p.id}" th:action="@{/admin/products/update}" method="post"></form>
+          <input type="hidden" name="id" th:value="${p.id}" th:attr="form='product-form-' + ${p.id}">
 
           <td class="ps-4">
             <span th:text="${p.nombre}" class="fw-bold d-block"></span>
             <small class="text-muted" th:text="'ID: ' + ${p.id}"></small>
           </td>
           <td>
-            <input type="number" step="0.01" name="precio" th:value="${p.precio}" class="form-control form-control-sm" style="width: 110px;" required>
+            <span th:text="${p.proveedor != null ? p.proveedor.nombre : 'Sense proveïdor'}"></span>
           </td>
           <td>
-            <input type="number" name="stock" th:value="${p.stock}" class="form-control form-control-sm" style="width: 80px;" required>
+            <div class="d-flex gap-2 align-items-center">
+              <select name="categoriaId" class="form-select form-select-sm" style="min-width: 170px;" required th:attr="form='product-form-' + ${p.id}">
+                <option th:each="cat : ${categorias}"
+                        th:value="${cat.id}"
+                        th:text="${cat.nombre}"
+                        th:selected="${p.categoria != null and p.categoria.id == cat.id}">
+                </option>
+              </select>
+            </div>
+          </td>
+          <td>
+            <input type="number" step="0.01" name="precio" th:value="${p.precio}" class="form-control form-control-sm" style="width: 110px;" required th:attr="form='product-form-' + ${p.id}">
+          </td>
+          <td>
+            <input type="number" name="stock" th:value="${p.stock}" class="form-control form-control-sm" style="width: 85px;" required th:attr="form='product-form-' + ${p.id}">
           </td>
           <td class="text-center">
-            <button type="submit" class="btn btn-primary btn-sm px-3">Guardar</button>
+            <button type="submit" class="btn btn-primary btn-sm px-3" th:attr="form='product-form-' + ${p.id}">Guardar</button>
           </td>
-        </form>
       </tr>
       </tbody>
     </table>
   </div>
+
+  <div id="category-create-panel" class="card shadow-sm border-0 mt-4">
+    <div class="card-body">
+      <h5 class="mb-3">Afegir nova categoria</h5>
+      <form th:action="@{/admin/categories/create}" method="post" class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label for="nombreCategoria" class="form-label">Nom</label>
+          <input id="nombreCategoria" name="nombre" type="text" class="form-control" placeholder="Ex: Begudes" required>
+        </div>
+        <div class="col-md-6">
+          <label for="descripcionCategoria" class="form-label">Descripcio</label>
+          <input id="descripcionCategoria" name="descripcion" type="text" class="form-control" placeholder="Opcional">
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-success">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="category-edit-panel" class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h5 class="mb-3">Editar categories creades</h5>
+      <form th:action="@{/admin/categories/update}" method="post" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label for="editCategoriaId" class="form-label">Categoria</label>
+          <select id="editCategoriaId" name="id" class="form-select" required>
+            <option th:each="cat : ${categorias}"
+                    th:value="${cat.id}"
+                    th:text="${cat.nombre}"
+                    th:attr="data-nombre=${cat.nombre},data-descripcion=${cat.descripcion}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="editCategoriaNombre" class="form-label">Nou nom</label>
+          <input id="editCategoriaNombre" name="nombre" type="text" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label for="editCategoriaDescripcion" class="form-label">Descripcio</label>
+          <input id="editCategoriaDescripcion" name="descripcion" type="text" class="form-control" placeholder="Opcional">
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-secondary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const editCategoriaId = document.getElementById('editCategoriaId');
+  const editCategoriaNombre = document.getElementById('editCategoriaNombre');
+  const editCategoriaDescripcion = document.getElementById('editCategoriaDescripcion');
+
+  if (editCategoriaId && editCategoriaNombre && editCategoriaDescripcion) {
+    const fillCategoryEditor = () => {
+      const selected = editCategoriaId.options[editCategoriaId.selectedIndex];
+      editCategoriaNombre.value = selected?.dataset?.nombre || '';
+      editCategoriaDescripcion.value = selected?.dataset?.descripcion || '';
+    };
+
+    editCategoriaId.addEventListener('change', fillCategoryEditor);
+    fillCategoryEditor();
+  }
+</script>
 </body>
 </html>
