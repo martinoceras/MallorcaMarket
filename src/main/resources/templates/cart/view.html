@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>La teva cistella - MallorcaMarket</title>
@@ -8,10 +9,36 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
     <div class="container">
-        <a class="navbar-brand" href="/">MallorcaMarket</a>
-        <a href="/" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> Continuar comprant</a>
+        <a class="navbar-brand fw-bold" th:href="@{/}">MallorcaMarket</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavCart">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNavCart">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}"><i class="bi bi-house-door"></i> Inici</a>
+                </li>
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
+                    <a class="nav-link fw-bold text-success" th:href="@{/orders/my-orders}">
+                        <i class="bi bi-bag-fill"></i> LES MEVES COMPRES
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated() and !hasRole('PROVIDER') and !hasRole('ADMIN')">
+                    <a class="btn btn-outline-light active" th:href="@{/cart}">
+                        <i class="bi bi-cart3"></i> Cistella
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-4" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button class="btn btn-danger btn-sm fw-bold" type="submit">Sortir</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
