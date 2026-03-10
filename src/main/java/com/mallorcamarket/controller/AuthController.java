@@ -14,22 +14,24 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Mostra el formulari de registre
+    // Mostra la vista de registre inicialitzant un model d'usuari buit.
     @GetMapping("/register")
     public String mostrarFormulariRegistre(Model model) {
         model.addAttribute("usuario", new Usuario());
-        return "auth/register"; // Ubicació a templates
+        return "auth/register";
     }
 
-    // Rep les dades del formulari i les envia al servei
+    // Processa el registre i delega la lògica de seguretat al servei d'usuaris.
     @PostMapping("/register")
     public String registrarUsuari(Usuario usuario) {
         usuarioService.registrar(usuario);
         return "redirect:/login?success"; // Redirigim al login amb missatge d'èxit
     }
+
+    // Mostra el formulari de login personalitzat de Spring Security.
     @GetMapping("/login")
     public String login() {
-        return "login/login"; // Això buscarà src/main/resources/templates/login.html
+        return "login/login";
     }
 
 }

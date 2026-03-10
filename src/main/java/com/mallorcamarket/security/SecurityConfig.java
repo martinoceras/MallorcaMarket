@@ -28,15 +28,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Rutes públiques
+                        // Endpoints públics: pàgina inicial, autenticació i recursos estàtics.
                         .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
 
-                        // ACCÉS PROVEÏDOR: Sincronitzat amb ROLE_PROVIDER de la teva BD
+                        // Zona de proveïdor: requereix perfil ROLE_PROVIDER.
                         .requestMatchers("/proveedor/**").hasRole("PROVIDER")
 
-                        // ACCÉS CLIENT: Sincronitzat amb ROLE_CLIENT de la teva BD
+                        // Zona de client: compres i carret restringits a ROLE_CLIENT.
                         .requestMatchers("/cart/**").hasRole("CLIENT")
 
+                        // Backoffice d'administració.
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

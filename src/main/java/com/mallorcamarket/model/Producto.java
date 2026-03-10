@@ -1,14 +1,14 @@
 package com.mallorcamarket.model;
 
 import jakarta.persistence.*;
-import lombok.Data; // <--- IMPRESCINDIBLE
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "productos")
-@Data // <--- Aquesta línia genera els mètodes setVisible() i getVisible()
+@Data // Lombok genera getters/setters i simplifica el model del domini.
 @NoArgsConstructor
 public class Producto {
 
@@ -22,7 +22,7 @@ public class Producto {
     private Integer stock;
     private String imageUrl;
 
-    // Només una vegada cada variable!
+    // Estat de negoci del producte: actiu/inactiu i visible/ocult a la botiga.
     private Boolean activo = true;
     private Boolean visible = true;
 

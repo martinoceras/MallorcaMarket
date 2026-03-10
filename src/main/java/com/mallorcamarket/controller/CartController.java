@@ -33,7 +33,7 @@ public class CartController {
 
         model.addAttribute("total", total);
 
-        // Atenció: Assegura't que el fitxer es digui "view.html" dins de "templates/cart/"
+        // Vista principal del carret mantingut en sessió HTTP.
         return "cart/view";
     }
 
@@ -45,7 +45,7 @@ public class CartController {
         boolean trobat = false;
         for (LineaPedido item : cart) {
             if (item.getProducto().getId().equals(id)) {
-                // Control d'estoc en afegir des de la botiga
+                // Si la línia ja existeix, només incrementem si no superem l'estoc.
                 if (item.getCantidad() < item.getProducto().getStock()) {
                     item.setCantidad(item.getCantidad() + 1);
                 }
@@ -69,7 +69,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // --- NOUS MÈTODES PER ALS BOTONS + I - DE LA CISTELLA ---
+    // Mètodes auxiliars per ajustar quantitats des de la vista del carret.
 
     @GetMapping("/add-one/{id}")
     public String addOne(@PathVariable Long id, HttpSession session) {
@@ -77,7 +77,7 @@ public class CartController {
         if (cart != null) {
             for (LineaPedido item : cart) {
                 if (item.getProducto().getId().equals(id)) {
-                    // Verifiquem l'estoc real abans d'incrementar
+                    // Mateixa regla de negoci: no superar estoc disponible.
                     if (item.getCantidad() < item.getProducto().getStock()) {
                         item.setCantidad(item.getCantidad() + 1);
                     }
@@ -97,7 +97,7 @@ public class CartController {
                     if (item.getCantidad() > 1) {
                         item.setCantidad(item.getCantidad() - 1);
                     } else {
-                        // Si només queda 1, l'eliminem de la cistella
+                        // Si la quantitat arriba a zero, eliminem la línia directament.
                         return "redirect:/cart/remove/" + id;
                     }
                     break;

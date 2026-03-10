@@ -10,20 +10,19 @@ import java.util.List;
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     /**
-     * Cerca per a la botiga pública:
-     * Retorna només els productes que no han estat eliminats (activo = true)
-     * i que el proveïdor ha decidit mostrar (visible = true).
+     * Consulta per a la botiga pública.
+     * Només retorna productes actius i visibles per als clients.
      */
     List<Producto> findByActivoTrueAndVisibleTrue();
 
     /**
-     * Cerca per al panell de gestió del proveïdor:
-     * Retorna tots els productes d'un venedor concret, estiguin o no ocults.
+     * Consulta de gestió per proveïdor.
+     * Retorna tots els productes d'un venedor, inclosos els ocults.
      */
     List<Producto> findByProveedor(Usuario proveedor);
 
     /**
-     * Cerca genèrica de productes no eliminats.
+     * Consulta auxiliar de productes actius.
      */
     List<Producto> findByActivoTrue();
 }

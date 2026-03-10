@@ -16,7 +16,7 @@ public class ProductoServiceImpl implements ProductoService {
     private ProductoRepository productoRepository;
 
     /**
-     * Implementació per a la botiga pública: només actius i visibles.
+     * Consulta orientada a la botiga pública: només mostra productes publicables.
      */
     @Override
     public List<Producto> listarTodosActivos() {
@@ -24,8 +24,7 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     /**
-     * AQUEST ÉS EL MÈTODE QUE ET FALTA I CAUSA L'ERROR:
-     * Retorna absolutament tots els productes de la base de dades.
+     * Consulta completa d'inventari per a pantalles de gestió i administració.
      */
     @Override
     public List<Producto> listarTodos() {

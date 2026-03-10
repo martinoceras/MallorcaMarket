@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "pedidos") // Millor en plural per a la base de dades
+@Table(name = "pedidos") // Nomenclatura en plural coherent amb la resta de taules.
 @Data
 @NoArgsConstructor
 public class Pedido {
@@ -16,21 +16,21 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Hem canviat 'createdAt' per 'fecha' per solucionar l'error de l'StackTrace
+    // Marca temporal de creació de la comanda.
     private LocalDateTime fecha = LocalDateTime.now();
 
     private BigDecimal total;
 
-    // Usem "estado" per mantenir el català com a la resta del projecte
+    // Estat funcional del procés de compra (PENDENT, CONFIRMAT, ENVIAT...).
     private String estado = "PENDENT";
 
-    // Relació amb el client que fa la compra
+    // Usuari client que ha realitzat la comanda.
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    // Relació amb els detalls de la comanda
-    // orphanRemoval = true serveix perquè si esborres una línia, s'esborri de la BD automàticament
+    // Línies de detall vinculades a la capçalera de comanda.
+    // orphanRemoval elimina de BD les línies desvinculades de la comanda.
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LineaPedido> lineas;
 }

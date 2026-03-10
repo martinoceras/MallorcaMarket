@@ -21,7 +21,7 @@ public class OrderController {
     @Autowired private PedidoService pedidoService;
     @Autowired private UsuarioService usuarioService;
 
-    @GetMapping("/my-orders") // URL final: /orders/my-orders
+    @GetMapping("/my-orders") // Ruta d'historial personal de comandes.
     public String showMyOrders(Model model, Principal principal) {
         Usuario usuario = usuarioService.buscarPorEmail(principal.getName());
         List<Pedido> pedidos = pedidoService.buscarPorUsuario(usuario);
@@ -29,9 +29,10 @@ public class OrderController {
         return "orders/list";
     }
 
-    @GetMapping("/details/{id}") // URL final: /orders/details/{id}
+    @GetMapping("/details/{id}") // Vista de detall d'una comanda concreta.
     public String showOrderDetails(@PathVariable Long id, Model model, Principal principal) {
         Pedido pedido = pedidoService.buscarPorId(id);
+        // Control d'accés: només el propietari de la comanda pot consultar el detall.
         if (pedido == null || !pedido.getUsuario().getEmail().equals(principal.getName())) {
             return "redirect:/orders/my-orders";
         }
@@ -41,32 +42,31 @@ public class OrderController {
 
     @PostMapping("/checkout")
     public String checkout(HttpSession session, Principal principal) {
-        // Recuperem la cistella de la sessió
+        // Recuperem la cistella desada a sessió.
         @SuppressWarnings("unchecked")
         List<LineaPedido> cart = (List<LineaPedido>) session.getAttribute("cart");
 
-        // Validem que la cistella no estigui buit
+        // Validació bàsica: no es pot tramitar una comanda sense línies.
         if (cart == null || cart.isEmpty()) {
             return "redirect:/cart";
         }
 
-        // Recuperem l'usuari actual
+        // Resolem l'usuari autenticat per vincular-li la comanda.
         Usuario usuario = usuarioService.buscarPorEmail(principal.getName());
         if (usuario == null) {
             return "redirect:/login";
         }
 
         try {
-            // Realitzem la comanda amb la lògica transaccional del servei
+            // Deleguem el procés transaccional de compra al servei.
             pedidoService.realizarPedido(cart, usuario);
 
-            // Esborrem la cistella de la sessió després de confirmar la comanda
+            // Si tot ha anat bé, netegem la sessió de carret.
             session.removeAttribute("cart");
 
-            // Redirigim a la pàgina d'èxit
             return "redirect:/orders/success";
         } catch (RuntimeException e) {
-            // Si hi ha error (p.ex. estoc insuficient), redirigim a la cistella amb l'error
+            // En cas d'error funcional (p. ex. estoc), redirigim amb missatge.
             return "redirect:/cart?error=" + e.getMessage();
         }
     }

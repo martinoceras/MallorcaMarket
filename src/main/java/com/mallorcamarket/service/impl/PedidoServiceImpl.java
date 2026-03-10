@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Implementació de la lògica de negoci per a les comandes (RF-05)
+ * Implementació de la capa de negoci de comandes.
+ * Aquest servei centralitza el checkout i la visió de comandes per rol.
  */
 @Service
 public class PedidoServiceImpl implements PedidoService {
 
-    // Injectem els repositoris necessaris per gestionar la persistència a MySQL
+    // Repositoris necessaris per persistir capçalera, línies i actualització d'estoc.
     @Autowired
     private PedidoRepository pedidoRepository;
 
@@ -27,73 +28,67 @@ public class PedidoServiceImpl implements PedidoService {
     private LineaPedidoRepository lineaPedidoRepository;
 
     /**
-     * Gestiona tot el procés de compra de forma atòmica (RF-05, RF-06)
-     * L'anotació @Transactional garanteix que si falla la resta d'estoc,
-     * no es guardi la comanda a la base de dades (Integritat de dades).
+     * Executa el procés de compra dins una transacció única.
+     * Si una línia falla (per exemple, estoc insuficient), es desfà tota l'operació.
      */
     @Override
     @Transactional
     public void realizarPedido(List<LineaPedido> cart, Usuario usuario) {
-        // 1. CREACIÓ DE LA CAPÇALERA DE LA COMANDA
+        // 1) Creem la capçalera de comanda amb metadades bàsiques.
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setFecha(LocalDateTime.now());
         pedido.setEstado("CONFIRMAT");
 
-        // Calculem el total de la compra recorrent la cistella
+        // Calculem el total global a partir de les línies de la cistella.
         BigDecimal total = cart.stream()
                 .map(item -> item.getPrecioUnitario().multiply(new BigDecimal(item.getCantidad())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         pedido.setTotal(total);
 
-        // Guardem el pedido inicial per generar el seu ID a la base de dades
+        // Guardem primer la capçalera per obtenir ID i vincular-hi les línies.
         final Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // 2. PROCESSAMENT DE PRODUCTES I ACTUALITZACIÓ D'ESTOC (RF-03, RF-08)
+        // 2) Per cada línia, validem estoc, actualitzem producte i persistim detall.
         for (LineaPedido item : cart) {
-            // Recuperem el producte actual de la base de dades
             Producto producto = item.getProducto();
-
-            // Calculem el nou estoc restant les unitats comprades
             int nouStock = producto.getStock() - item.getCantidad();
 
-            // Validació de seguretat: si no hi ha prou estoc, llancem error i la transacció es cancel·la
+            // Validació crítica: no permetre vendes amb estoc negatiu.
             if (nouStock < 0) {
                 throw new RuntimeException("No hi ha prou estoc per a: " + producto.getNombre());
             }
 
-            // Actualitzem el producte amb el nou estoc a la taula 'productos'
             producto.setStock(nouStock);
             productoRepository.save(producto);
 
-            // Relacionem la línia de detall amb la comanda principal i la guardem
             item.setPedido(pedidoGuardado);
             lineaPedidoRepository.save(item);
         }
     }
 
     /**
-     * Recupera l'historial de comandes d'un usuari concret ordenat per data (descendent)
+     * Recupera l'historial d'un usuari ordenat de més recent a més antic.
      */
     @Override
     public List<Pedido> buscarPorUsuario(Usuario usuario) {
-        // Assegura't que el nom coincideixi exactament amb el del Repositori
         return pedidoRepository.findByUsuarioOrderByFechaDesc(usuario);
     }
 
     /**
-     * Busca una comanda específica pel seu identificador (per a la vista de detalls)
+     * Consulta puntual d'una comanda per ID.
      */
     @Override
     public Pedido buscarPorId(Long id) {
-        // Fem servir Optional.orElse(null) per evitar errors si l'ID no existeix
         return pedidoRepository.findById(id).orElse(null);
     }
+
     @Override
     public List<Pedido> buscarPorProveedor(Usuario proveedor) {
-        // Cridem al repositori per fer la consulta a la base de dades
+        // Consulta base: totes les comandes on apareix el proveïdor.
         return pedidoRepository.findByProveedor(proveedor);
     }
+
     @Override
     public void guardar(Pedido pedido) {
         pedidoRepository.save(pedido);
@@ -105,7 +100,7 @@ public class PedidoServiceImpl implements PedidoService {
             return false;
         }
 
-        // Defensive null checks avoid runtime failures when some products lost provider linkage.
+        // Comprovació defensiva per evitar errors si alguna línia té referències incompletes.
         return pedido.getLineas().stream()
                 .anyMatch(linea -> linea.getProducto() != null
                         && linea.getProducto().getProveedor() != null
@@ -118,6 +113,7 @@ public class PedidoServiceImpl implements PedidoService {
             return List.of();
         }
 
+        // Construïm una vista "projectada" on cada proveïdor només veu les seves línies.
         return buscarPorProveedor(proveedor).stream()
                 .map(pedido -> buildProveedorView(pedido, proveedor))
                 .filter(pedido -> !pedido.getLineas().isEmpty())
@@ -152,6 +148,7 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public List<Pedido> listarTodos() {
+        // Vista administrativa ordenada per data descendent.
         return pedidoRepository.findAll().stream()
                 .sorted((p1, p2) -> p2.getFecha().compareTo(p1.getFecha()))
                 .toList();

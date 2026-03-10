@@ -29,7 +29,8 @@ public class ProveedorController {
     @Autowired private PedidoService pedidoService;
     @Autowired private CategoriaService categoriaService;
 
-    // --- 1. PRODUCTES (FUNCIONALITAT ORIGINAL RECUPERADA) ---
+    // --- BLOC TFG: GESTIÓ DEL CATÀLEG DEL PROVEÏDOR ---
+    // Aquest endpoint només mostra productes del compte autenticat.
     @GetMapping("/products")
     public String myProducts(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
@@ -47,6 +48,7 @@ public class ProveedorController {
         Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
         Producto producto = productoService.buscarPorId(id);
 
+        // Validació d'autorització: cada proveïdor només pot modificar els seus productes.
         if (isNotOwnedByProveedor(producto, proveedor)) {
             ra.addFlashAttribute("error", "No pots editar aquest producte.");
             return "redirect:/proveedor/products";
@@ -71,6 +73,7 @@ public class ProveedorController {
             return "redirect:/proveedor/products";
         }
 
+        // Baixa lògica: preserva històric i possibilita restauració.
         p.setActivo(false);
         productoService.guardar(p);
         ra.addFlashAttribute("success", "Producte enviat a la paperera.");
@@ -107,6 +110,7 @@ public class ProveedorController {
             return "redirect:/proveedor/products";
         }
 
+        // Baixa física: només després d'una acció explícita de l'usuari.
         productoService.eliminar(id);
         ra.addFlashAttribute("success", "Producte eliminat permanentment de la base de dades.");
         return "redirect:/proveedor/products";
@@ -124,6 +128,7 @@ public class ProveedorController {
             return "redirect:/proveedor/products";
         }
 
+        // Alterna visibilitat pública sense afectar l'estat actiu intern.
         p.setVisible(!Boolean.TRUE.equals(p.getVisible()));
         productoService.guardar(p);
         String status = Boolean.TRUE.equals(p.getVisible()) ? "públic" : "privat";
@@ -131,7 +136,8 @@ public class ProveedorController {
         return "redirect:/proveedor/products";
     }
 
-    // --- 2. VENDES REBUDES (LA NOVA FUNCIONALITAT) ---
+    // --- BLOC TFG: VENDES REBUDES ---
+    // Mostra només la part de comandes que correspon al proveïdor autenticat.
     @GetMapping("/orders")
     public String myOrders(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
@@ -144,6 +150,7 @@ public class ProveedorController {
     public String enviarPedido(@PathVariable Long id, Principal principal, RedirectAttributes ra) {
         Pedido pedido = pedidoService.buscarPorId(id);
         Usuario proveedor = usuarioService.buscarPorEmail(principal.getName());
+        // Control de pertinença per evitar canvis d'estat en comandes alienes.
         if (pedido != null && pedidoService.pertanyAlProveedor(pedido, proveedor)) {
             pedido.setEstado("ENVIAT");
             pedidoService.guardar(pedido);
@@ -151,15 +158,15 @@ public class ProveedorController {
         }
         return "redirect:/proveedor/orders";
     }
-    // --- OBRIR FORMULARI DE NOU PRODUCTE ---
+
+    // --- BLOC TFG: FORMULARI D'ALTA I EDICIÓ DE PRODUCTE ---
     @GetMapping("/products/new")
     public String showNewProductForm(Model model) {
         model.addAttribute("producto", new Producto());
         model.addAttribute("categorias", categoriaService.listarTodas());
-        return "proveedor/product-form"; // crear HTML específic per a aquest formulari (templates/proveedor/product-form.html)
+        return "proveedor/product-form"; // Formulari compartit entre alta i edició.
     }
 
-    // --- OBRIR FORMULARI D'EDICIÓ (Amb dades ja posades) ---
     @GetMapping("/products/edit/{id}")
     public String showEditProductForm(@PathVariable Long id,
                                       Model model,
@@ -178,7 +185,6 @@ public class ProveedorController {
         return "proveedor/product-form";
     }
 
-    // --- DESAR LES DADES DEL FORMULARI ---
     @PostMapping("/products/save")
     public String saveProduct(@ModelAttribute Producto formProducto,
                               @AuthenticationPrincipal UserDetails currentUser,
@@ -187,12 +193,12 @@ public class ProveedorController {
 
         Producto productoToSave;
         if (formProducto.getId() == null) {
-            // Producte nou
+            // Flux d'alta: inicialitzam valors de domini per defecte.
             productoToSave = new Producto();
             productoToSave.setActivo(true);
             productoToSave.setVisible(true);
         } else {
-            // Edicio d'un producte existent
+            // Flux d'edició: recuperam entitat persistent per evitar pèrdua de camps.
             productoToSave = productoService.buscarPorId(formProducto.getId());
             if (isNotOwnedByProveedor(productoToSave, proveedor)) {
                 ra.addFlashAttribute("error", "No pots modificar aquest producte.");
@@ -200,7 +206,7 @@ public class ProveedorController {
             }
         }
 
-        // Actualitza camps editables i conserva proveidor/flags dels productes existents.
+        // Estratègia de patch: només s'actualitzen camps exposats al formulari.
         productoToSave.setNombre(formProducto.getNombre());
         productoToSave.setDescripcion(formProducto.getDescripcion());
         productoToSave.setPrecio(formProducto.getPrecio());
@@ -214,6 +220,7 @@ public class ProveedorController {
             return "redirect:/proveedor/products";
         }
 
+        // Validació defensiva davant categories inexistents o IDs manipulats.
         Categoria categoria = categoriaService.buscarPorId(categoriaId);
         if (categoria == null) {
             ra.addFlashAttribute("error", "La categoria seleccionada no existeix.");
@@ -226,6 +233,7 @@ public class ProveedorController {
         return "redirect:/proveedor/products";
     }
 
+    // Mètode auxiliar de seguretat per centralitzar la comprovació de propietat.
     private boolean isNotOwnedByProveedor(Producto producto, Usuario proveedor) {
         return producto == null
                 || producto.getProveedor() == null

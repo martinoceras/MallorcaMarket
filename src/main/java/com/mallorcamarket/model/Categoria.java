@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
-// @Entity: Defineix la categoria com una taula a la base de dades
+// Entitat de suport per classificar productes dins el catàleg.
 @Entity
 @Table(name = "categoria")
-@Data // Genera automàticament getters i setters
+@Data // Redueix codi repetitiu del model (getters/setters).
 public class Categoria {
 
     @Id
@@ -15,11 +15,11 @@ public class Categoria {
     private Long id;
 
     @Column(nullable = false, length = 100)
-    private String nombre; // Nom de la categoria (ex: Alimentació, Artesania)
+    private String nombre; // Exemples: Alimentació, Artesania.
 
-    private String descripcion; // Descripció del tipus de productes
+    private String descripcion; // Text descriptiu per a la gestió interna.
 
-    // RELACIÓ 1:N - Una categoria pot tenir molts productes
+    // Relació 1:N: una categoria pot incloure múltiples productes.
     @OneToMany(mappedBy = "categoria")
     private List<Producto> productos;
 

@@ -3,18 +3,18 @@ package com.mallorcamarket.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-// @Entity indica a Spring que aquesta classe s'ha de transformar en una taula de la BD
+// Entitat que representa els comptes d'accés de la plataforma.
 @Entity
-@Table(name = "usuarios") // Donam nom a la taula a MySQL
-@Data // Genera automàticament Getters, Setters, toString i Equals (gràcies a Lombok)
+@Table(name = "usuarios")
+@Data // Lombok redueix codi repetitiu del model (getters/setters, etc.).
 public class Usuario {
 
-    // @Id marca aquest camp com a la clau primària (Primary Key)
+    // Identificador tècnic autogenerat per la base de dades.
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // L'ID serà autoincremental (1, 2, 3...)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // @Column(unique = true) evita que hi hagi dos usuaris amb el mateix correu
+    // L'email és únic perquè s'utilitza com a credencial d'autenticació.
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -23,24 +23,23 @@ public class Usuario {
 
     private String nombre;
 
-    // Aquest camp servirà per controlar si és "ADMIN", "PROVEEDOR" o "CLIENTE"
+    // Rol funcional dins el sistema: ADMIN, PROVIDER o CLIENT.
     private String rol;
 
-    // Constructor buit (Obligatori per a JPA)
+    // Constructor buit requerit per JPA.
     public Usuario() {
     }
 
-    // Constructor per facilitar la creació d'usuaris des del codi
+    // Constructor auxiliar per crear usuaris de forma explícita en proves o seeding.
     public Usuario(String email, String password, String nombre, String rol) {
         this.email = email;
         this.password = password;
         this.nombre = nombre;
         this.rol = rol;
     }
-    // Mètode per saber si està actiu (Getter)
-    // Mètode per canviar l'estat (Setter)
-    // Dins de la classe Usuario
-    private boolean enabled; // Aquest booleà guarda si l'usuari pot entrar (true) o no (false)
+
+    // Estat de bloqueig del compte (true = pot autenticar-se).
+    private boolean enabled;
 
     @Override
     public boolean equals(Object o) {

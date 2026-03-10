@@ -4,10 +4,9 @@ import com.mallorcamarket.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository // Indica que aquest component gestiona l'accés a la base de dades
+@Repository // Repositori de persistència d'usuaris.
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // Spring Data JPA és "màgic": només escrivint el nom del mètode així,
-    // ell sol crearà la consulta SQL: SELECT * FROM usuarios WHERE email = ?
+    // Consulta derivada de Spring Data per localitzar usuaris pel seu email.
     Usuario findByEmail(String email);
 }

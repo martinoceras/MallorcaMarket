@@ -16,14 +16,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 /**
- * Controlador per a les funcions d'administració de la plataforma (Back-office).
- * Gestiona el manteniment d'usuaris i productes.
+ * Controlador del backoffice d'administració.
+ * Agrupa operacions de manteniment sobre usuaris, productes, categories i comandes.
  */
 @Controller
-@RequestMapping("/admin") // Totes les rutes d'aquest controlador requeriran el prefix /admin
+@RequestMapping("/admin") // Prefix comú de totes les rutes del panell admin.
 public class AdminController {
 
-    // Injecció de dependències dels serveis necessaris
+    // Serveis de domini consumits per les vistes del backoffice.
     @Autowired
     private UsuarioService usuarioService;
 
@@ -41,25 +41,21 @@ public class AdminController {
     // =========================================================================
 
     /**
-     * Llista tots els usuaris registrats a la base de dades.
-     * @param model Objecte per passar dades a la vista de Thymeleaf.
+     * Carrega el llistat complet d'usuaris per a administració.
      */
     @GetMapping("/users")
     public String listUsers(Model model) {
-        // Obtenim la llista des del servei i l'afegim al model
         model.addAttribute("usuarios", usuarioService.listarTodos());
-        return "admin/users"; // Retorna la plantilla templates/admin/users.html
+        return "admin/users";
     }
 
     /**
-     * Activa o desactiva un usuari segons el seu estat actual.
-     * @param id Identificador únic de l'usuari a modificar.
+     * Commuta l'estat actiu/inactiu d'un usuari.
      */
     @PostMapping("/users/toggle/{id}")
     public String toggleUser(@PathVariable Long id) {
-        // Crida a la lògica de negoci per commutar l'estat enabled
         usuarioService.cambiarEstado(id);
-        return "redirect:/admin/users"; // Redirecció per evitar re-enviaments de formulari
+        return "redirect:/admin/users";
     }
 
     // =========================================================================
@@ -67,18 +63,18 @@ public class AdminController {
     // =========================================================================
 
     /**
-     * Mostra l'inventari de productes per a la seva gestió.
+     * Mostra la taula de productes amb el catàleg de categories disponible.
      */
     @GetMapping("/products")
     public String listProducts(Model model) {
-        // Carreguem els productes per pintar la taula d'edició
         model.addAttribute("productos", productoService.listarTodos());
         model.addAttribute("categorias", categoriaService.listarTodas());
-        return "admin/products"; // Retorna templates/admin/products.html
+        return "admin/products";
     }
 
     /**
-     * Actualitza les dades editables d'un producte sense perdre camps existents.
+     * Actualitza camps editables d'un producte des del panell admin.
+     * Es fa càrrega prèvia d'entitat per evitar perdre informació no editable.
      */
     @PostMapping("/products/update")
     public String updateProduct(@RequestParam("id") Long id,
@@ -109,7 +105,7 @@ public class AdminController {
     }
 
     /**
-     * Crea una nova categoria per als productes.
+     * Dona d'alta una nova categoria des de la vista d'inventari.
      */
     @PostMapping("/categories/create")
     public String createCategory(@RequestParam("nombre") String nombre,
@@ -131,7 +127,7 @@ public class AdminController {
     }
 
     /**
-     * Actualitza una categoria existent.
+     * Edita una categoria existent mantenint la validació bàsica del nom.
      */
     @PostMapping("/categories/update")
     public String updateCategory(@RequestParam("id") Long id,
@@ -163,7 +159,7 @@ public class AdminController {
     // =========================================================================
 
     /**
-     * Mostra totes les comandes de tots els proveïdors.
+     * Vista global de comandes per a supervisió administrativa.
      */
     @GetMapping("/orders")
     public String listAllOrders(Model model) {

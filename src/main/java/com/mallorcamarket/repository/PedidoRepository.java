@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // Aquest és el mètode que el teu Service està buscant ara mateix
+    // Historial de comandes d'un client ordenat de més recent a més antic.
     List<Pedido> findByUsuarioOrderByFechaDesc(Usuario usuario);
 
-    // Mètode per a la zona de proveïdor: cerca comandes que tinguin els seus productes
+    // Comandes on apareixen productes d'un proveïdor concret.
     @Query("SELECT DISTINCT p FROM Pedido p JOIN p.lineas l WHERE l.producto.proveedor = :proveedor ORDER BY p.fecha DESC")
     List<Pedido> findByProveedor(@Param("proveedor") Usuario proveedor);
 

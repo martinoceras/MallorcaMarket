@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
-    // Aquesta interfície ens permetrà fer CategoriaRepository.save() i .findAll()
+    // Repositori JPA estàndard: ja incorpora operacions CRUD sense codi addicional.
 }

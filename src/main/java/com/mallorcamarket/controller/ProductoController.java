@@ -25,18 +25,18 @@ public class ProductoController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Llistar productes (Pàgina principal)
+    // Punt d'entrada de la botiga: adapta el llistat segons el rol autenticat.
     @GetMapping("/")
     public String index(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         List<Producto> productos;
 
-        // If logged in as a provider, show only their products
+        // Si l'usuari és proveïdor, només veu els seus productes per facilitar la gestió pròpia.
         if (currentUser != null && currentUser.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_PROVIDER"))) {
             Usuario proveedor = usuarioService.buscarPorEmail(currentUser.getUsername());
             productos = productoService.buscarPorProveedor(proveedor);
         } else {
-            // If not logged in or not a provider, show all active and visible products
+            // En mode client o visitant, només es mostren productes actius i visibles.
             productos = productoService.listarTodosActivos();
         }
 
@@ -45,7 +45,7 @@ public class ProductoController {
     }
 
 
-    // Mostrar formulari per a nou producte
+    // Mostra el formulari d'alta de producte dins el flux antic /productes.
     @GetMapping("/productes/nou")
     public String mostrarFormulariNou(Model model) {
         model.addAttribute("producto", new Producto());
@@ -53,17 +53,14 @@ public class ProductoController {
         return "productes/formulari";
     }
 
-    // Aquest mètode rep les dades del formulari HTML
+    // Rep les dades del formulari i les persisteix a través del servei.
     @PostMapping("/productes/guardar")
     public String guardarProducte(@ModelAttribute("producto") Producto producto) {
-        // 1. Cridem al servei per persistir l'objecte a MySQL
         productoService.guardar(producto);
-
-        // 2. Redirigim a la pàgina principal per veure el producte llistat
         return "redirect:/";
     }
 
-    // Editar un producte existent
+    // Obre el formulari en mode edició carregant les dades actuals del producte.
     @GetMapping("/productes/editar/{id}")
     public String mostrarFormulariEditar(@PathVariable("id") Long id, Model model) {
         Producto producto = productoService.buscarPorId(id);
@@ -72,10 +69,9 @@ public class ProductoController {
         return "productes/formulari";
     }
 
-    // Esborrat lògic del producte
+    // Elimina el producte segons la política configurada al servei.
     @GetMapping("/productes/eliminar/{id}")
     public String eliminarProducte(@PathVariable("id") Long id) {
-        // CANVIA eliminarLogico per eliminar
         productoService.eliminar(id);
         return "redirect:/";
     }

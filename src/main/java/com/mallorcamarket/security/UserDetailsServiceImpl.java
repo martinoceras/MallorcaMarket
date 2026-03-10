@@ -20,17 +20,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // 1. Busquem l'usuari pel seu email a la base de dades
+        // Punt clau d'autenticació: convertim l'email en un usuari intern de la BD.
         Usuario usuario = usuarioRepository.findByEmail(email);
 
         if (usuario == null) {
             throw new UsernameNotFoundException("Usuari no trobat: " + email);
         }
 
-        // 2. Retornem un objecte User de Spring Security amb les dades de la nostra BD
+        // Adaptem el nostre model Usuario al tipus User que espera Spring Security.
         return new User(
                 usuario.getEmail(),
-                usuario.getPassword(), // Aquesta ja estarà encriptada amb BCrypt
+                usuario.getPassword(), // La contrasenya ja està xifrada amb BCrypt.
                 Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol()))
         );
     }
